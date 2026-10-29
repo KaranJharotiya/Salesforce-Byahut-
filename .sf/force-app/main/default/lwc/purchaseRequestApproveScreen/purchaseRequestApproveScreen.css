@@ -1,0 +1,8 @@
+:host .slds-accordion__summary-heading {
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.slds-table td {
+    vertical-align: middle;
+}

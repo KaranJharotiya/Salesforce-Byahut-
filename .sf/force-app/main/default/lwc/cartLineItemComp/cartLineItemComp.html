@@ -1,0 +1,215 @@
+<template>
+    <lightning-card title="Generate Quote">
+
+        <lightning-spinner if:true={isLoading} alternative-text="Loading" size="medium"></lightning-spinner>
+
+        <!-- 4 Column Layout for Inputs -->
+        <div class="slds-grid slds-wrap slds-gutters slds-p-around_x-small">
+            
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-p-bottom_small">
+                <c-reusable-lookup label="Product Name" object-label="Product" object-api-name="Product__c"
+                    field-api-name="Name" onvalueselected={handleValueSelectedOnAccount}
+                    onvalueremoved={handleValueRemoved}>
+                </c-reusable-lookup>
+            </div>
+
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-p-bottom_small">
+                <c-reusable-lookup label="Product CAS Number" object-label="Product" object-api-name="Product__c"
+                    field-api-name="CAS_Number__c" onvalueselected={handleValueSelectedOnAccount}
+                    onvalueremoved={handleValueRemoved}>
+                </c-reusable-lookup>
+            </div>
+
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-p-bottom_small">
+                <c-reusable-lookup label="Product Brand" object-label="Product" object-api-name="Brand_Master__c"
+                    field-api-name="Name" onvalueselected={handleValueSelectedOnAccount}
+                    onvalueremoved={handleValueRemoved}>
+                </c-reusable-lookup>
+            </div>
+
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-p-bottom_small">
+                <c-reusable-lookup label="Product Code" object-label="Product" object-api-name="Product__c"
+                    field-api-name="Code__c" onvalueselected={handleValueSelectedOnAccount}
+                    onvalueremoved={handleValueRemoved}>
+                </c-reusable-lookup>
+            </div>
+
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-p-bottom_small">
+                <lightning-combobox name="Industry" label="Industry" value={value} placeholder="Select Industry"
+                    options={options} onchange={handleIndustrySelect}></lightning-combobox>
+            </div>
+
+        </div>
+
+        <div if:true={grandTotalAmount} style="height:30px; text-align:right; margin-top:30px;">
+            <!-- Grand Total Section -->
+        </div>
+
+        <!-- Searched Products Section -->
+        <div if:true={isDataLoaded} style="text-align:center; font-size:18px; margin-top:30px; font-weight:700;">
+            Searched Products
+        </div>
+
+        <div class="table-wrapper" if:true={isDataLoaded}>
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>S No.</th>
+                        <th>Name</th>
+                        <th>Industry</th>
+                        <th>CAS Number</th>
+                        <th>Product Code</th>
+                        <th>Brand</th>
+                        <th>Sub Brand</th>
+                        <th>Category</th>
+                        <th>Sub Category</th>
+                        <th>Stock</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Amount</th>
+                        <th>Discount %</th>
+                        <th>Discount Amount</th>
+                        <th>After Discount</th>
+                        <th>GST %</th>
+                        <th>GST Amount</th>
+                        <th>Total Amount Inc. GST</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <template for:each={productRecords} for:item="row" for:index="index">
+                        <tr key={row.Id}>
+                            <td>
+                                <lightning-input name="checkbox" type="checkbox" data-index={index} data-id={row.Id}
+                                    onchange={handleInputChange}>
+                                </lightning-input>
+                            </td>
+                            <td>{index+1}</td>
+                            <td>{row.Name}</td>
+                            <td>{row.Industry__c}</td>
+                            <td>{row.CAS_Number__c}</td>
+                            <td>{row.Code__c}</td>
+                            <td>{row.brand}</td>
+                            <td>{row.subBrand}</td>
+                            <td>{row.category}</td>
+                            <td>{row.subCategory}</td>
+                            <td>{row.Stock__c}</td>
+                            <td>₹ {row.List_Price__c}</td>
+                            <td>
+                                <lightning-input name="qty" disabled={row.isDisableQty} type="number"
+                                    value={row.Quantity} data-index={index} data-id={row.Id}
+                                    onchange={handleInputChange}>
+                                </lightning-input>
+                            </td>
+                            <td> <span if:true={row.amount}> ₹ {row.amount} </span> </td>
+                            <td>
+                                <lightning-input name="discount" disabled={row.isDisableQty} type="number"
+                                    value={row.Discount} data-index={index} data-id={row.Id}
+                                    onchange={handleInputChange}>
+                                </lightning-input>
+                            </td>
+                            <td> <span if:true={row.discountAmount}> ₹ {row.discountAmount} </span> </td>
+                            <td> <span if:true={row.afterDiscount}> ₹ {row.afterDiscount} </span> </td>
+                            <td>
+                                <lightning-input name="gst" disabled={row.isDisableQty} type="number" value={row.gst}
+                                    data-index={index} data-id={row.Id} onchange={handleInputChange}>
+                                </lightning-input>
+                            </td>
+                            <td> <span if:true={row.gstAmount}> ₹ {row.gstAmount} </span> </td>
+                            <td> <span if:true={row.TotalAmount}> ₹ {row.TotalAmount} </span> </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Suggested Products Section -->
+        <div if:true={isSuggestedDateLoad} style="text-align:center; font-size:18px; margin-top:30px; font-weight:700;">
+            Suggested Products
+        </div>
+
+        <div class="table-wrapper" if:true={isSuggestedDateLoad}>
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>S No.</th>
+                        <th>Name</th>
+                        <th>Industry</th>
+                        <th>CAS Number</th>
+                        <th>Product Code</th>
+                        <th>Brand</th>
+                        <th>Sub Brand</th>
+                        <th>Category</th>
+                        <th>Sub Category</th>
+                        <th>Stock</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Amount</th>
+                        <th>Discount %</th>
+                        <th>Discount Amount</th>
+                        <th>After Discount</th>
+                        <th>GST %</th>
+                        <th>GST Amount</th>
+                        <th>Total Amount Inc. GST</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <template for:each={suggestedProductsList} for:item="row" for:index="index">
+                        <tr key={row.Id}>
+                            <td>
+                                <lightning-input name="checkbox" type="checkbox" data-index={index} data-id={row.Id}
+                                    onchange={handleSuggestedInputChange}>
+                                </lightning-input>
+                            </td>
+                            <td>{index+1}</td>
+                            <td>{row.Name}</td>
+                            <td>{row.Industry__c}</td>
+                            <td>{row.CAS_Number__c}</td>
+                            <td>{row.Code__c}</td>
+                            <td>{row.brand}</td>
+                            <td>{row.subBrand}</td>
+                            <td>{row.category}</td>
+                            <td>{row.subCategory}</td>
+                            <td>{row.Stock__c}</td>
+                            <td>₹ {row.List_Price__c}</td>
+                            <td>
+                                <lightning-input name="qty" disabled={row.isDisableQty} type="number"
+                                    value={row.Quantity} data-index={index} data-id={row.Id}
+                                    onchange={handleSuggestedInputChange}>
+                                </lightning-input>
+                            </td>
+                            <td> <span if:true={row.amount}> ₹ {row.amount} </span> </td>
+                            <td>
+                                <lightning-input name="discount" disabled={row.isDisableQty} type="number"
+                                    value={row.Discount} data-index={index} data-id={row.Id}
+                                    onchange={handleSuggestedInputChange}>
+                                </lightning-input>
+                            </td>
+                            <td> <span if:true={row.discountAmount}> ₹ {row.discountAmount} </span> </td>
+                            <td> <span if:true={row.afterDiscount}> ₹ {row.afterDiscount} </span> </td>
+                            <td>
+                                <lightning-input name="gst" disabled={row.isDisableQty} type="number" value={row.gst}
+                                    data-index={index} data-id={row.Id} onchange={handleSuggestedInputChange}>
+                                </lightning-input>
+                            </td>
+                            <td> <span if:true={row.gstAmount}> ₹ {row.gstAmount} </span> </td>
+                            <td> <span if:true={row.TotalAmount}> ₹ {row.TotalAmount} </span> </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Center Aligned Save & Cancel Buttons -->
+        <div if:true={isDataLoaded} class="slds-align_absolute-center slds-p-around_medium">
+            <lightning-button class="slds-m-horizontal_x-small" label="Cancel" onclick={handleCancel}>
+            </lightning-button>
+            <lightning-button class="slds-m-horizontal_x-small" variant="brand" label="Save" onclick={handleClickSave}>
+            </lightning-button>
+        </div>
+
+    </lightning-card>
+</template>

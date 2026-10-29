@@ -1,0 +1,21 @@
+.todo-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    background: #f4f6f9;
+    border-left: 4px solid #0176d3;
+}
+
+.serial-number {
+    font-weight: bold;
+    margin-right: 10px;
+    color: #0176d3;
+    min-width: 20px;
+}
+
+.task-text {
+    font-size: 14px;
+    word-break: break-word;
+}

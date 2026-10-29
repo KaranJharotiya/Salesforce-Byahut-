@@ -1,0 +1,327 @@
+<apex:page controller="QuotationPdfController" applyHtmlTag="false" showHeader="false" renderAs="PDF" language="us-US" cache="false">
+    <html>
+        <head>
+            <style>
+                table {
+                    border-collapse: collapse;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="page-break" style="border:13px solid #00d5b3; display:block;">
+                
+                <table style="width:100%; border-collapse:collapse; font-family:Arial; font-size:11px; border:1px solid black;">
+                    <tr>
+                        <td style="width:32%; vertical-align:top; border:1px solid black;"> 
+                            <div style="width:100%; border-bottom: 1px solid black; padding:0; margin:0; font-size:14px; text-align:center; padding-top:5px; padding-bottom:5px;">
+                                <span style="color:red; font-size:18px;">GST No:-</span>08BDJPG0112Q1ZJ<br/>
+                            </div>
+                            <p style="padding:4px; font-size:14px; margin:0;">
+                                <span style="color:#60adcb; font-size:18px;">Dealers In:-</span> Laboratory Chemicals, Glasswares, Plasticwares, Filter Papers, Chromatography Consumables, CRM's, SRM's, GC &amp; HPLC Columns, Microbiology Media, Reply to Use Kits and many more....
+                            </p>
+                        </td>
+                        
+                        <td style="text-align:center; width:36%; vertical-align:top; border:1px solid black;"> 
+                            <table style="width:100%; border:none;">
+                                <tr>
+                                    <td style="vertical-align:middle; text-align:right; border:none;">
+                                        <img src="{!URLFOR($Resource.ByahutPdfLogo)}" style="height:80px; margin-left:10px;" />
+                                    </td>
+                                    <td style="text-align:left; vertical-align:bottom; font-size:28px; font-weight:bold; color:#008cd0; border:none;">
+                                        <span></span> Byahut
+                                    </td>
+                                </tr>
+                            </table>
+                            <div style="height:20px;">
+                                <span style="font-size:14px;">
+                                    Shop No. 1, Near Kamani Factory, Jhotwara, Jaipur, RAJASTHAN 302012
+                                </span>
+                            </div>
+                        </td>
+                        
+                        <td style="width:32%; vertical-align:top; border:1px solid black;"> 
+                            <div style="width:100%; border-bottom: 1px solid black; padding:0; margin:0; font-size:14px; text-align:center; padding-top:5px; padding-bottom:5px;">
+                                <span style="color:red; font-size:18px;">Contact No:-</span> +91-9414065135
+                            </div>
+                            <p style="padding:4px; font-size:14px; margin:0;">
+                                <span style="color:#60adcb; font-size:18px;">Stockist:-</span> Lovibond (Water &amp; Colour Range), EUTECH, MERCK, QUALIGENS, BOROSIL, GLASSCO, SIGMA, TARSONS, SHIMADZU, METTLER TOLEDO, HIMEDIA and many more......
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+                
+                <table style="width:100%; border-collapse:collapse; font-family:Arial; font-size:14px; border:1px solid black; border-top:none;">
+                    <tr>
+                        <td style="text-align:left; padding-top:5px; padding-bottom:5px; width:33%; border:1px solid black; border-top:none; border-right:none;">
+                            <p style="margin-left:5px; margin-top:2px; margin-bottom:2px;">
+                                <span style="font-size:16px; font-weight:600;"> PAN:
+                                    <span style="font-size:14px; font-weight:400;"> {!utilityWrapperObj.pan} </span>
+                                </span>
+                            </p> 
+                        </td>
+                        <td style="text-align:left; padding-top:5px; padding-bottom:5px; width:34%; border:1px solid black; border-top:none; border-left:none; border-right:none;">
+                            <p style="margin-left:5px; margin-top:2px; margin-bottom:2px;">
+                                <span style="font-size:16px; font-weight:600;"> DRUG LICENSE: 
+                                    <span style="font-size:14px; font-weight:400;"> {!utilityWrapperObj.drugLicense} </span>
+                                </span>
+                            </p>
+                        </td>
+                        <td style="text-align:left; padding-top:5px; padding-bottom:5px; width:33%; border:1px solid black; border-top:none; border-left:none;">
+                            <p style="margin-left:5px; margin-top:2px; margin-bottom:2px;">
+                                <span style="font-size:16px; font-weight:600;"> TAN: 
+                                    <span style="font-size:14px; font-weight:400;"> {!utilityWrapperObj.tan} </span>
+                                </span>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+                
+                <table style="width:100%; border-collapse:collapse; font-family:Arial; font-size:15px; border:1px solid black; border-top:none;">
+                    <tr>
+                        <td style="width:50%; padding-top:5px; padding-bottom:5px; border-left:1px solid black; border-top:none; border-bottom:none; border-right:none;">
+                            <div style="padding-left:5px;">
+                                <span style="font-size:16px; font-weight:600;">Quotation No.</span> : {!quotationNumber}
+                            </div>
+                        </td>                       
+                        <td style="width:50%; padding-top:5px; padding-bottom:5px; border-right:1px solid black; border-top:none; border-bottom:none; border-left:none;">
+                            <div style="padding-left:5px;">
+                                <span style="font-size:16px; font-weight:600;"> Date: </span>:
+                                <apex:outputText value="{0,date,dd-MM-yyyy}"> <apex:param value="{!qDate}" /> </apex:outputText>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td style="width:50%; padding-top:5px; padding-bottom:5px; border-left:1px solid black; border-top:none; border-bottom:none; border-right:none; vertical-align:top;">
+                            <p style="padding-left:5px; margin:0;">
+                                <span style="font-size:16px; font-weight:600;">Bill to</span>   : 
+                                <span style="font-size:13px; font-weight:400;"> {!billingAddress} </span>
+                            </p>
+                        </td>
+                        
+                        <td style="width:50%; padding-top:5px; padding-bottom:5px; border-right:1px solid black; border-top:none; border-bottom:none; border-left:none; vertical-align:top;">
+                            <p style="padding-left:5px; margin:0;">
+                                <span style="font-size:16px; font-weight:600;">Ship To</span>: 
+                                <span style="font-size:13px; font-weight:400;"> {!shippingAddress} </span>
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td style="width:50%; padding-top:5px; padding-bottom:5px; border-left:1px solid black; border-top:none; border-bottom:none; border-right:none; vertical-align:top;">
+                            <div style="padding-left:5px;">
+                                <p style="padding:0; margin:0; margin-top:4px;">
+                                    <span style="font-size:16px; font-weight:600;">Contact No: 
+                                        <span style="font-size:13px; font-weight:400;"> {!utilityWrapperObj.contactNumber} </span>
+                                    </span>
+                                </p>
+                                <p style="padding:0; margin:0; margin-top:4px;">
+                                    <span style="font-size:16px; font-weight:600;"> Email Id: 
+                                        <span style="font-size:13px; font-weight:400;"> {!utilityWrapperObj.Email} </span>
+                                    </span>
+                                </p>
+                                <p style="padding:0; margin:0; margin-top:4px;">
+                                    <span style="font-size:16px; font-weight:600;"> Payment Terms: 
+                                        <span style="font-size:13px; font-weight:400;"> {!utilityWrapperObj.paymentTerm} </span>
+                                    </span>
+                                </p>
+                            </div>
+                        </td>
+                        <td style="width:50%; padding-top:5px; padding-bottom:5px; border-right:1px solid black; border-top:none; border-bottom:none; border-left:none; vertical-align:top;">
+                            <div style="padding-left:5px;">
+                                <p style="padding:0; margin:0; margin-top:0;">
+                                    <span style="font-size:16px; font-weight:600;"> GST No: 
+                                        <span style="font-size:13px; font-weight:400;"> {!utilityWrapperObj.gstNumber} </span>
+                                    </span>
+                                </p>
+                                <p style="padding:0; margin:0; margin-top:4px;">
+                                    <span style="font-size:16px; font-weight:600;"> Created By: 
+                                        <span style="font-size:13px; font-weight:400;"> {!utilityWrapperObj.createdBy} </span>
+                                    </span>
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+                
+                <table style="width:100%; border-collapse:collapse; font-family:Arial; font-size:11px; border:1px solid black; border-top:none;"> 
+                    <tr style="height:25px; text-align:center; background-color:#ffbc00; padding-top:4px; padding-bottom:4px;">
+                        <th style="border:1px solid black;">Sno.</th>
+                        <th style="border:1px solid black;">Item Name</th>
+                        <apex:outputPanel rendered="{!isBrandVisible}" layout="none">
+                            <th style="border:1px solid black;">Brand</th>
+                        </apex:outputPanel>
+                        <apex:outputPanel rendered="{!isGradeVisible}" layout="none">
+                            <th style="border:1px solid black;">Grade</th>
+                        </apex:outputPanel>
+                        <apex:outputPanel rendered="{!isCasNumberVisible}" layout="none">
+                            <th style="border:1px solid black;">Cas Number</th>
+                        </apex:outputPanel>
+                        <apex:outputPanel rendered="{!isCodeVisible}" layout="none">
+                            <th style="border:1px solid black;">Code</th>
+                        </apex:outputPanel>
+                        <th style="border:1px solid black;">Pack</th>
+                        <th style="border:1px solid black;">Qty</th>
+                        <th style="border:1px solid black;">Rate in each</th>
+                        <th style="border:1px solid black;">Total Amount</th>
+                        <th style="border:1px solid black;">Dis%</th>
+                        <th style="border:1px solid black;">After Diss</th>
+                        <th style="border:1px solid black;">GST%</th>
+                    </tr>
+                    
+                    <apex:variable value="{!0}" var="cont"/>
+                    
+                    <!-- Line Items Repeat with Dis & GST values in brackets -->
+                    <apex:repeat value="{!quotationLineItemList}" var="item">
+                        <apex:variable var="cont" value="{!cont + 1}"/>
+                        <tr style="text-align:center; font-size:11px;">
+                            <td style="border:1px solid black;">
+                                <p style="margin-top:5px; margin-bottom:5px;">{!cont}</p>
+                            </td>
+                            <td style="border:1px solid black;">
+                                <p style="margin-top:5px; margin-bottom:5px;">
+                                    <a href="{!item.Product__r.Image_URL__c}" target="_blank" rel="noopener noreferrer">
+                                        {!item.Product__r.Name}
+                                    </a>
+                                </p>
+                            </td>
+                            <apex:outputPanel rendered="{!isBrandVisible}" layout="none">
+                                <td style="border:1px solid black;"><p style="margin-top:5px; margin-bottom:5px;">{!item.Product__r.Brand__r.Name}</p></td>
+                            </apex:outputPanel>
+                            <apex:outputPanel rendered="{!isGradeVisible}" layout="none">
+                                <td style="border:1px solid black;"><p style="margin-top:5px; margin-bottom:5px;">{!item.Product__r.Grade__c}</p></td>
+                            </apex:outputPanel>
+                            <apex:outputPanel rendered="{!isCasNumberVisible}" layout="none">
+                                <td style="border:1px solid black;"><p style="margin-top:5px; margin-bottom:5px;">{!item.Product__r.CAS_Number__c}</p></td>
+                            </apex:outputPanel>
+                            <apex:outputPanel rendered="{!isCodeVisible}" layout="none">
+                                <td style="border:1px solid black;"><p style="margin-top:5px; margin-bottom:5px;">{!item.Product__r.Code__c}</p></td>
+                            </apex:outputPanel>
+                            <td style="border:1px solid black;"><p style="margin-top:5px; margin-bottom:5px;">{!item.Product__r.Pack_Size__c}</p></td>
+                            <td style="border:1px solid black;"><p style="margin-top:5px; margin-bottom:5px;">{!item.Quantity__c}</p></td>
+                            <td style="border:1px solid black;"><p style="margin-top:5px; margin-bottom:5px;">{!item.Amount__c}</p></td>
+                            <td style="border:1px solid black;"><p style="margin-top:5px; margin-bottom:5px;">{!item.Total_Amount__c}</p></td>
+                            
+                            <!-- Dis% with Amount in Bracket -->
+                            <td style="border:1px solid black;">
+                                <p style="margin-top:5px; margin-bottom:0px;">
+                                    <apex:outputText value="{0, number, 0}%" rendered="{!NOT(ISBLANK(item.Discount__c))}">
+                                        <apex:param value="{!item.Discount__c}"/>
+                                    </apex:outputText>
+                                </p>
+                                <apex:outputPanel rendered="{!NOT(ISBLANK(item.Discount__c)) && NOT(ISBLANK(item.Total_Amount__c))}">
+                                    <p style="margin-top:2px; margin-bottom:5px; font-size:10px; color:#555;">
+                                        ({!ROUND((item.Total_Amount__c * item.Discount__c)/100, 2)})
+                                    </p>
+                                </apex:outputPanel>
+                            </td>
+
+                            <td style="border:1px solid black;"><p style="margin-top:5px; margin-bottom:5px;">{!item.After_Discount__c}</p></td>
+
+                            <!-- GST% with Amount in Bracket -->
+                            <td style="border:1px solid black;">
+                                <p style="margin-top:5px; margin-bottom:0px;">
+                                    <apex:outputText value="{0, number, 0}%" rendered="{!NOT(ISBLANK(item.GST__c))}">
+                                        <apex:param value="{!item.GST__c}"/>
+                                    </apex:outputText>
+                                </p>
+                                <apex:outputPanel rendered="{!NOT(ISBLANK(item.GST__c)) && (NOT(ISBLANK(item.After_Discount__c)) || NOT(ISBLANK(item.Total_Amount__c)))}">
+                                    <p style="margin-top:2px; margin-bottom:5px; font-size:10px; color:#555;">
+                                        ({!ROUND(((IF(ISBLANK(item.After_Discount__c), item.Total_Amount__c, item.After_Discount__c)) * item.GST__c)/100, 2)})
+                                    </p>
+                                </apex:outputPanel>
+                            </td>
+                        </tr>
+                    </apex:repeat>
+                    
+                    <tr>
+                        <td style="height:10px; background-color:#00d5b3; border:1px solid black;" colspan="13"></td>
+                    </tr>
+                </table>
+                
+                <table style="width:100%; border-collapse:collapse; font-family:Arial; border:1px solid black; border-top:none;"> 
+                    <tr>
+                        <td style="width:50%; border:1px solid black; border-top:none; border-bottom:none;">
+                            <p style="text-align:center; font-size:18px; font-weight:600; margin:5px 0;">
+                                General Terms
+                            </p>
+                        </td>
+                        
+                        <td style="width:50%; border:1px solid black; border-top:none; border-bottom:none; border-left:none;">
+                            <div>
+                                <p style="text-align:center; font-size:18px; font-weight:600; margin:5px 0;">
+                                    Total Taxable Value: {!grandTotalWithGst}
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+                
+                <table style="width:100%; border-collapse:collapse; font-family:Arial; font-size:15px; border:1px solid black; border-top:1px solid black;"> 
+                    <tr>
+                        <td style="width:50%; border:1px solid black; vertical-align:top; padding:5px;">
+                            <ul style="margin:0; padding:0; margin-left:14px;" >
+                                <apex:outputPanel layout="none" >
+                                    <li style="font-weight:600;">Inco Termse </li>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="none" >
+                                    <li style="margin-top:4px; font-weight:600;">Validity</li>
+                                </apex:outputPanel>
+                            </ul>
+                        </td>
+                        <td style="width:50%; border:1px solid black; border-left:none; vertical-align:top; padding:5px;">
+                            <div style="padding:5px;">
+                                <ul style="margin:0; padding:0; margin-left:14px;" >
+                                    <apex:outputPanel layout="none" rendered="{!igstAmount > 0}">
+                                        <li style="font-weight:600;">IGST: {!igstAmount}</li>
+                                    </apex:outputPanel>
+                                    <apex:outputPanel layout="none" rendered="{!sgstAmount > 0}">
+                                        <li style="margin-top:4px; font-weight:600;">SGST: {!sgstAmount}</li>
+                                    </apex:outputPanel>
+                                    <apex:outputPanel layout="none" rendered="{!cgstAmount > 0}">
+                                        <li style="font-weight:600;">CGST: {!cgstAmount}</li>
+                                    </apex:outputPanel>
+                                    
+                                    <apex:outputPanel layout="none" >
+                                        <li style="margin-top:4px; font-weight:600;"> Total GST Value: {!igstAmount + sgstAmount + cgstAmount}</li>
+                                    </apex:outputPanel>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div style="border:13px solid #00d5b3; margin-top:20px; page-break-inside: avoid;"> 
+                <table style="width:100%; border-collapse:collapse; font-family:Arial; font-size:15px; table-layout:fixed; border:1px solid black;">
+                    <tr>
+                        <td style="width:50%; vertical-align:top; padding:10px; border:1px solid black;">
+                            <h4 style="text-align:left; font-size:18px; font-weight:600; margin:4px 0 8px 0;">
+                                Payment Terms &amp; Conditions:
+                            </h4>
+                            <ul style="margin:0; padding-left:20px;">
+                                <apex:repeat value="{!paymentTermsAndConditions}" var="term">
+                                    <li style="margin-top:4px;">
+                                        {!term}
+                                    </li>
+                                </apex:repeat>
+                            </ul>
+                        </td>
+                        <td style="width:50%; vertical-align:top; padding:10px; border:1px solid black; border-left:none;">
+                            <h4 style="text-align:left; font-size:18px; font-weight:600; margin:4px 0 8px 0;">
+                                Dispatch Terms &amp; Conditions:
+                            </h4>
+                            <ul style="margin:0; padding-left:20px;">
+                                <apex:repeat value="{!dispatchTermsAndConditions}" var="term">
+                                    <li style="margin-top:4px;">
+                                        {!term}
+                                    </li>
+                                </apex:repeat>
+                            </ul>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </body>
+    </html>
+</apex:page>

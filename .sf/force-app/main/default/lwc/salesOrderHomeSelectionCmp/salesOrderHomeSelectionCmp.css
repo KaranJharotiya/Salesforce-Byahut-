@@ -1,0 +1,93 @@
+.content-area {
+    min-height: 420px;
+    position: relative;
+}
+
+/* Container ko fixed height dene se lightning-datatable ka header automatically freeze / sticky rehta hai */
+.datatable-container {
+    height: 410px;
+    position: relative;
+    border-radius: 4px;
+}
+
+/* Datatable sticky header styling */
+.table-container lightning-datatable {
+    height: 100%;
+}
+
+/* Freeze Table Header on scroll */
+.table-container thead th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: #f3f3f3;
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.2);
+}
+
+.pagination-bar {
+    background-color: #fafaf9;
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: 1px solid #e5e5e5;
+}
+
+.page-size {
+    width: 80px;
+}
+/* Base Sticky Footer */
+.sticky-footer {
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: #ffffff;
+    z-index: 20;
+}
+
+/* Desktop/Tablet alignment: Left button left me, Right button right me */
+.footer-item-left {
+    text-align: left;
+}
+
+.footer-item-right {
+    text-align: right;
+}
+
+/* --- SIRF MOBILE KE LIYE (max-width: 767px) --- */
+@media (max-width: 767px) {
+    .datatable-container {
+        height: 320px;
+    }
+
+    .page-size-container {
+        justify-content: center !important;
+    }
+
+    .pagination-bar {
+        text-align: center;
+        gap: 8px 0;
+    }
+
+    /* Dono items ko mobile par center aur space dena */
+    .footer-item-left,
+    .footer-item-right {
+        text-align: center;
+        width: 100%;
+    }
+
+    .footer-item-left {
+        margin-bottom: 0.5rem;
+        /* Upar wale button ke neeche gap */
+    }
+
+    /* Mobile par button ko normal height aur single-line rakhna */
+    .mobile-full-btn {
+        display: block;
+        width: 100%;
+    }
+
+    .mobile-full-btn button {
+        width: 100%;
+        white-space: nowrap;
+    }
+}

@@ -1,0 +1,12 @@
+.datatable-container {
+    height: 300px;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 767px) {
+    .datatable-container {
+        height: 280px;
+    }
+}

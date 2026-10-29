@@ -1,0 +1,207 @@
+/* deliveryScheduleModal.css */
+
+.custom-modal .slds-modal__container {
+    max-width: 75rem;
+    width: 90%;
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #0176d3, #014486);
+    color: white;
+    border-bottom: none;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.title-section h2 {
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.delivery-type {
+    font-size: 14px;
+    opacity: 0.95;
+}
+
+.delivery-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+    margin-left: 6px;
+}
+
+.delivery-badge.full {
+    background: #d8f5e4;
+    color: #057d43;
+}
+
+.delivery-badge.partial {
+    background: #fff2cc;
+    color: #8a5a00;
+}
+
+.modal-body {
+    background: #f7f9fb;
+    min-height: 300px;
+}
+
+.table-wrapper {
+    border-radius: 14px;
+    overflow: hidden;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.custom-table {
+    border: none;
+}
+
+.table-header {
+    background: #eef4ff;
+    font-weight: 700;
+    color: #16325c;
+}
+
+.custom-table tbody tr:hover {
+    background: #f4f8ff;
+    transition: 0.3s;
+}
+
+.product-name {
+    font-weight: 600;
+    color: #16325c;
+}
+
+.priority {
+    padding: 5px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.priority.high {
+    background: #ffe5e5;
+    color: #c23934;
+}
+
+.priority.medium {
+    background: #fff3cd;
+    color: #8a6d3b;
+}
+
+.priority.low {
+    background: #d9f7e8;
+    color: #2e844a;
+}
+
+.footer-section {
+    background: #fafafa;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px;
+    font-size: 16px;
+    color: #666;
+}
+
+.instruction-box {
+    margin-top: 24px;
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-left: 5px solid #0176d3;
+}
+
+.instruction-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.instruction-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #16325c;
+}
+
+.instruction-body {
+    font-size: 14px;
+    line-height: 1.7;
+    color: #444;
+    background: #f7f9fb;
+    padding: 14px;
+    border-radius: 10px;
+    white-space: pre-wrap;
+}
+
+/* ===================================================
+   Small Screen / Mobile Responsiveness
+   =================================================== */
+@media screen and (max-width: 768px) {
+    .custom-modal .slds-modal__container {
+        width: 96%;
+        margin: 0 auto;
+        padding: 0.5rem 0;
+    }
+
+    .modal-body {
+        padding: 0.75rem !important;
+        min-height: auto;
+    }
+
+    .header-content {
+        gap: 10px;
+        align-items: flex-start;
+    }
+
+    .title-section h2 {
+        font-size: 1.1rem;
+        line-height: 1.3;
+    }
+
+    .delivery-type {
+        font-size: 12px;
+        margin-top: 4px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .delivery-badge {
+        margin-left: 0;
+        padding: 2px 8px;
+        font-size: 11px;
+    }
+
+    /* Table horizontal scrolling for narrow displays */
+    .table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .custom-table {
+        min-width: 480px;
+    }
+
+    .instruction-box {
+        margin-top: 16px;
+        padding: 14px;
+    }
+
+    .instruction-title {
+        font-size: 14px;
+    }
+
+    .instruction-body {
+        font-size: 13px;
+        padding: 10px;
+    }
+}

@@ -1,0 +1,21 @@
+<apex:page standardController="Sales_Order__c" lightningStylesheets="true" showHeader="false" sidebar="false">
+    <apex:includeLightning />
+    
+    <div id="lwcHost" />
+    
+    <script>
+        var singleId = '{!Sales_Order__c.Id}';
+        
+        $Lightning.use("c:CreateChallanApp", function() {
+            $Lightning.createComponent(
+                "c:createChallanLwc",
+                { 
+                    recordIds: [singleId], 
+                    recordId: singleId      
+                },
+                "lwcHost",
+                function(cmp) {}
+            );
+        });
+    </script>
+</apex:page>

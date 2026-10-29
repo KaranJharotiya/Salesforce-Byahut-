@@ -1,0 +1,47 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 10-12-2026
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<template>
+    <lightning-card>
+        <h3 slot="title" class="slds-m-horizontal_medium slds-m-top_x-small">
+            <lightning-icon icon-name="standard:home" size="small"></lightning-icon>
+            <span class="slds-m-left_small">Business Progress</span>
+        </h3>
+        <template if:true={isLoading}>
+            <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+        </template>
+
+        <template if:false={isLoading}>
+
+            <template if:true={hasNoAccess}>
+                <div class="slds-var-p-around_medium slds-text-align_center slds-text-color_weak">
+                    Your profile ({profileName}) doesn't have access to any modules here.
+                    Contact your administrator.
+                </div>
+            </template>
+
+            <template if:false={hasNoAccess}>
+                <div class="slds-p-horizontal_medium">
+                    <lightning-tabset variant="scoped">
+                        <template for:each={modules} for:item="mod">
+                            <lightning-tab key={mod.key} label={mod.label} icon-name="standard:orders">
+                                <c-module-progress
+                                    is-community={IsCommunity}
+                                    module-key={mod.key}
+                                    module-label={mod.label}
+                                    closed-status-label={mod.closedStatusLabel}>
+                                </c-module-progress>
+                            </lightning-tab>
+                        </template>
+                    </lightning-tabset>
+                </div>
+            </template>
+
+        </template>
+
+    </lightning-card>
+</template>

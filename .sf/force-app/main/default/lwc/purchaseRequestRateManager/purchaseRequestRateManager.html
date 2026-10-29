@@ -1,0 +1,150 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 09-24-2026
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<template>
+    <lightning-card title="Add / Update Vendor Rates" icon-name="standard:price_books">
+
+        <!-- Spinner -->
+        <template if:true={isLoading}>
+            <lightning-spinner alternative-text="Loading Rates" size="medium"></lightning-spinner>
+        </template>
+
+        <!-- Body with Accordion -->
+        <div class="slds-p-around_medium">
+            <template if:true={hasProductSections}>
+                <lightning-accordion allow-multiple-sections-open active-section-name={activeSections}>
+                    <template for:each={accordionData} for:item="prod">
+                        <lightning-accordion-section key={prod.prLineItemId} name={prod.prLineItemId}
+                            label={prod.sectionLabel} class="slds-card slds-card_boundary slds-m-bottom_small">
+
+                            <template if:true={prod.hasVendors}>
+                                <div class="slds-m-top_xx-small slds-scrollable_x">
+                                    <table
+                                        class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped">
+                                        <thead>
+                                            <tr class="slds-line-height_reset" style="background-color: #f3f3f3;">
+                                                <th scope="col">
+                                                    <div class="slds-truncate slds-text-title_bold" title="Vendor" style="width:100px;">
+                                                        Vendor</div>
+                                                </th>
+                                                <th scope="col" >
+                                                    <div class="slds-truncate slds-text-title_bold" title="Quantity" style="width:100px;">
+                                                        Quantity</div>
+                                                </th>
+                                                <th scope="col">
+                                                    <div class="slds-truncate slds-text-title_bold" title="Rate" style="width:120px;">Rate
+                                                    </div>
+                                                </th>
+                                                <th scope="col" >
+                                                    <div class="slds-truncate slds-text-title_bold"
+                                                        title="Discount (%)" style="width:100px;">Discount (%)</div>
+                                                </th>
+                                                <th scope="col" >
+                                                    <div class="slds-truncate slds-text-title_bold" title="GST (%)" style="width:100px;">GST
+                                                        (%)</div>
+                                                </th>
+                                                <th scope="col" >
+                                                    <div class="slds-truncate slds-text-title_bold"
+                                                        title="Delivery/Transportation Charges">
+                                                        Delivery/Transportation Charges</div>
+                                                </th>
+                                                <th scope="col" >
+                                                    <div class="slds-truncate slds-text-title_bold"
+                                                        title="Other Applicable Commercial Terms">
+                                                        Other Applicable Commercial Terms</div>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template for:each={prod.vendorRates} for:item="ven">
+                                                <tr key={ven.vendorMasterId} class="slds-hint-parent">
+                                                    <td>
+                                                        <div
+                                                            class="slds-truncate slds-text-body_regular slds-text-title_bold">
+                                                            {ven.vendorMasterName}
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <lightning-input type="number" variant="label-hidden"
+                                                            data-line-id={prod.prLineItemId}
+                                                            data-vendor-id={ven.vendorMasterId} data-field="quantity"
+                                                            value={ven.quantity} min="0" onchange={handleInputChange}>
+                                                        </lightning-input>
+                                                    </td>
+                                                    <td>
+                                                        <lightning-input type="number" formatter="currency" step="0.01"
+                                                            variant="label-hidden" data-line-id={prod.prLineItemId}
+                                                            data-vendor-id={ven.vendorMasterId} data-field="rate"
+                                                            value={ven.rate} min="0" onchange={handleInputChange}>
+                                                        </lightning-input>
+                                                    </td>
+                                                    <td>
+                                                        <lightning-input type="number" variant="label-hidden"
+                                                            data-line-id={prod.prLineItemId}
+                                                            data-vendor-id={ven.vendorMasterId} data-field="discount"
+                                                            value={ven.discount} min="0" onchange={handleInputChange}>
+                                                        </lightning-input>
+                                                    </td>
+                                                    <td>
+                                                        <lightning-input type="number" variant="label-hidden"
+                                                            data-line-id={prod.prLineItemId}
+                                                            data-vendor-id={ven.vendorMasterId} data-field="gst"
+                                                            value={ven.gst} min="0" onchange={handleInputChange}>
+                                                        </lightning-input>
+                                                    </td>
+                                                    <td>
+                                                        <lightning-input type="number" formatter="currency" step="0.01"
+                                                            variant="label-hidden" data-line-id={prod.prLineItemId}
+                                                            data-vendor-id={ven.vendorMasterId}
+                                                            data-field="deliveryCharges" value={ven.deliveryCharges}
+                                                            min="0" onchange={handleInputChange}>
+                                                        </lightning-input>
+                                                    </td>
+                                                    <td>
+                                                        <lightning-textarea variant="label-hidden"
+                                                            data-line-id={prod.prLineItemId}
+                                                            data-vendor-id={ven.vendorMasterId}
+                                                            data-field="commercialTerms" value={ven.commercialTerms}
+                                                            onchange={handleInputChange}>
+                                                        </lightning-textarea>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </template>
+
+                            <template if:false={prod.hasVendors}>
+                                <div
+                                    class="slds-p-around_medium slds-text-align_center slds-theme_shade slds-text-color_weak">
+                                    No Vendors mapped to this product's brand.
+                                </div>
+                            </template>
+
+                        </lightning-accordion-section>
+                    </template>
+                </lightning-accordion>
+            </template>
+
+            <template if:false={hasProductSections}>
+                <div class="slds-box slds-text-align_center slds-p-around_large slds-text-color_weak slds-theme_shade">
+                    No Purchase Request Line Items found for this record.
+                </div>
+            </template>
+        </div>
+
+        <!-- Footer -->
+        <div slot="footer" class="slds-p-top_x-small slds-border_top slds-grid slds-grid_align-center">
+            <lightning-button variant="neutral" label="Cancel" onclick={handleCloseModal} class="slds-m-right_small">
+            </lightning-button>
+            <lightning-button variant="brand" label="Save Rates" onclick={handleSaveRates}>
+            </lightning-button>
+        </div>
+
+    </lightning-card>
+</template>

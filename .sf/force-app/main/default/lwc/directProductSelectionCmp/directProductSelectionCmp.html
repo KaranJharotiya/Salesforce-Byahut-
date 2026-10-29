@@ -1,0 +1,410 @@
+<!--
+  @description       : Direct Product Selection Child Component
+  @last modified on  : 10-06-2026
+-->
+<template>
+    <div>
+        <lightning-spinner if:true={isLoading} alternative-text="Loading" size="medium"></lightning-spinner>
+
+        <!-- Search Filters Section (Responsive Grid) -->
+        <div class="slds-box slds-box_x-small slds-theme_shade slds-m-bottom_small">
+            <div class="slds-grid slds-wrap slds-gutters_x-small slds-grid_vertical-align-end">
+                <div
+                    class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-5 slds-p-bottom_small">
+                    <lightning-record-picker label="Product Name" name="name" data-field="Name"
+                        object-api-name="Product__c" onchange={handleRecordChange} matching-info={pNameMatchingInfo}
+                        display-info={pNameDisplayInfo}>
+                    </lightning-record-picker>
+                </div>
+
+                <div
+                    class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-5 slds-p-bottom_small">
+                    <lightning-record-picker label="Product CAS Number" name="casNumber" object-api-name="Product__c"
+                        onchange={handleCASNumberChange} matching-info={pCasMatchingInfo}
+                        display-info={pCasDisplayInfo}>
+                    </lightning-record-picker>
+                </div>
+
+                <div
+                    class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-5 slds-p-bottom_small">
+                    <lightning-record-picker label="Product Brand" name="brand" data-field="Name"
+                        object-api-name="Brand_Master__c" onchange={handleBrandNameChange}
+                        matching-info={pBrandMatchingInfo} display-info={pBrandDisplayInfo}>
+                    </lightning-record-picker>
+                </div>
+
+                <div
+                    class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-5 slds-p-bottom_small">
+                    <lightning-record-picker label="Product Code" name="productCode" object-api-name="Product__c"
+                        onchange={handleCodeChange} matching-info={pCodeMatchingInfo} display-info={pCodeDisplayInfo}>
+                    </lightning-record-picker>
+                </div>
+
+                <div
+                    class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-5 slds-p-bottom_small">
+                    <lightning-combobox name="Industry" label="Industry" value={value} placeholder="Select Industry"
+                        options={options} onchange={handleIndustrySelect}>
+                    </lightning-combobox>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grand Total Badge -->
+        <div if:true={grandTotalAmount} class="slds-grid slds-grid_align-end slds-m-bottom_small">
+            <div class="slds-badge slds-theme_success slds-p-around_x-small slds-text-heading_small"
+                style="font-weight: bold;">
+                Grand Total: ₹ {grandTotalAmount}
+            </div>
+        </div>
+
+        <!-- Searched Products Section -->
+        <template if:true={isDataLoaded}>
+            <div class="slds-text-heading_medium slds-text-align_center slds-m-top_medium slds-m-bottom_small">
+                Searched Products
+            </div>
+
+            <!-- Scrollable container with sticky header support -->
+            <div class="slds-scrollable_x table-container slds-m-bottom_medium">
+                <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
+                    <thead>
+                        <tr class="slds-line-height_reset">
+                            <th scope="col">
+                                <div class="slds-truncate">Select</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate">S No.</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate">Name</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate">Industry</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate">CAS Number</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate">Product Code</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate">Brand</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate">Sub Brand</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate">Category</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate">Sub Category</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate">Stock</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate">Hold Quantity</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate">Available Quantity</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate" style="min-width: 105px;">Price</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate" style="min-width: 95px;">Quantity</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate">Amount</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate" style="min-width: 85px;">Discount %</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate">Discount Amount</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate">After Discount</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate" style="min-width: 80px;">GST %</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate">GST Amount</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate">Total Amount Inc. GST</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate" style="min-width: 140px;">Promise Dispatch Date</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate" style="min-width: 140px;">Priority</div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={displayedProductRecords} for:item="row">
+                            <tr key={row.Id}>
+                                <td>
+                                    <lightning-input name="checkbox" type="checkbox" data-index={row.originalIndex}
+                                        data-id={row.Id} checked={row.isChecked} onchange={handleInputChange}>
+                                    </lightning-input>
+                                </td>
+                                <td>{row.serialNumber}</td>
+                                <td>{row.Name}</td>
+                                <td>{row.Industry__c}</td>
+                                <td>{row.CAS_Number__c}</td>
+                                <td>{row.Code__c}</td>
+                                <td>{row.brand}</td>
+                                <td>{row.subBrand}</td>
+                                <td>{row.category}</td>
+                                <td>{row.subCategory}</td>
+                                <td>{row.Stock__c}</td>
+                                <td>{row.Hold_Quantity__c}</td>
+                                <td>{row.Available_Quantity__c}</td>
+                                <td>
+                                    <template if:false={row.isEditingPrice}>
+                                        <span>₹ {row.List_Price__c}</span>
+                                        <template if:false={row.isDisablePrice}>
+                                            <lightning-button-icon icon-name="utility:edit" variant="bare"
+                                                alternative-text="Edit Price" class="slds-m-left_xx-small"
+                                                data-index={row.originalIndex} data-id={row.Id}
+                                                onclick={handleEditPrice}>
+                                            </lightning-button-icon>
+                                        </template>
+                                    </template>
+                                    <template if:true={row.isEditingPrice}>
+                                        <lightning-input type="number" step="0.01" name="price"
+                                            value={row.List_Price__c} data-index={row.originalIndex} data-id={row.Id}
+                                            onchange={handleInputChange} onblur={handlePriceBlur}
+                                            variant="label-hidden">
+                                        </lightning-input>
+                                    </template>
+                                </td>
+                                <td>
+                                    <lightning-input name="qty" disabled={row.isDisableQty} type="number"
+                                        value={row.Quantity} data-index={row.originalIndex} data-id={row.Id}
+                                        onchange={handleInputChange} variant="label-hidden">
+                                    </lightning-input>
+                                </td>
+                                <td><span if:true={row.amount}>₹ {row.amount}</span></td>
+                                <td>
+                                    <lightning-input name="discount" disabled={row.isDisableQty} type="number"
+                                        value={row.Discount} data-index={row.originalIndex} data-id={row.Id}
+                                        onchange={handleInputChange} variant="label-hidden">
+                                    </lightning-input>
+                                </td>
+                                <td><span if:true={row.discountAmount}>₹ {row.discountAmount}</span></td>
+                                <td><span if:true={row.afterDiscount}>₹ {row.afterDiscount}</span></td>
+                                <td>
+                                    <lightning-input name="gst" disabled={row.isDisableQty} type="number"
+                                        value={row.gst} data-index={row.originalIndex} data-id={row.Id}
+                                        onchange={handleInputChange} variant="label-hidden">
+                                    </lightning-input>
+                                </td>
+                                <td><span if:true={row.gstAmount}>₹ {row.gstAmount}</span></td>
+                                <td><span if:true={row.TotalAmount}>₹ {row.TotalAmount}</span></td>
+                                <td>
+                                    <lightning-input name="promiseDate" disabled={row.isDisableQty} type="date"
+                                        value={row.promiseDate} data-index={row.originalIndex} data-id={row.Id}
+                                        onchange={handleInputChange} variant="label-hidden">
+                                    </lightning-input>
+                                </td>
+                                <td>
+                                    <lightning-combobox name="priority" value={row.priority} options={priorityOptions}
+                                        onchange={handleInputChange} data-index={row.originalIndex} data-id={row.Id}
+                                        disabled={row.isPriorityDisable} variant="label-hidden">
+                                    </lightning-combobox>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination Controls for Searched Products -->
+            <div class="slds-m-top_medium slds-m-bottom_medium slds-align_absolute-center"
+                if:false={disablePaginationSearchProducts}>
+                <lightning-button label="Previous" onclick={handlePrevPage} disabled={isFirstPage}>
+                </lightning-button>
+                <span class="slds-m-horizontal_medium">Page {currentPage} of {totalPages}</span>
+                <lightning-button label="Next" onclick={handleNextPage} disabled={isLastPage}>
+                </lightning-button>
+            </div>
+        </template>
+
+        <!-- Suggested Products Section -->
+        <template if:true={isSuggestedDateLoad}>
+            <div class="slds-text-heading_medium slds-text-align_center slds-m-top_large slds-m-bottom_small">
+                Suggested Products
+            </div>
+
+            <div class="slds-scrollable_x table-container">
+                <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
+                    <thead>
+                        <tr class="slds-line-height_reset">
+                            <th scope="col">
+                                <div class="slds-truncate">Select</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate">S No.</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate">Name</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate">Industry</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate">CAS Number</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate">Product Code</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate">Brand</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate">Sub Brand</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate">Category</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate">Sub Category</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate">Stock</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate">Hold Quantity</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate">Available Quantity</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate" style="min-width: 105px;">Price</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate" style="min-width: 95px;">Quantity</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate">Amount</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate" style="min-width: 85px;">Discount %</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate">Discount Amount</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate">After Discount</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate" style="min-width: 80px;">GST %</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate">GST Amount</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate">Total Amount Inc. GST</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate" style="min-width: 140px;">Promise Dispatch Date</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate" style="min-width: 140px;">Priority</div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={displayedSuggestedProductRecords} for:item="row">
+                            <tr key={row.Id}>
+                                <td>
+                                    <lightning-input name="checkbox" type="checkbox" data-index={row.originalIndex}
+                                        data-id={row.Id} checked={row.isChecked} onchange={handleSuggestedInputChange}>
+                                    </lightning-input>
+                                </td>
+                                <td>{row.serialNumber}</td>
+                                <td>{row.Name}</td>
+                                <td>{row.Industry__c}</td>
+                                <td>{row.CAS_Number__c}</td>
+                                <td>{row.Code__c}</td>
+                                <td>{row.brand}</td>
+                                <td>{row.subBrand}</td>
+                                <td>{row.category}</td>
+                                <td>{row.subCategory}</td>
+                                <td>{row.Stock__c}</td>
+                                <td>{row.Hold_Quantity__c}</td>
+                                <td>{row.Available_Quantity__c}</td>
+                                <td>
+                                    <template if:false={row.isEditingPrice}>
+                                        <span>₹ {row.List_Price__c}</span>
+                                        <template if:false={row.isDisablePrice}>
+                                            <lightning-button-icon icon-name="utility:edit" variant="bare"
+                                                alternative-text="Edit Price" class="slds-m-left_xx-small"
+                                                data-index={row.originalIndex} data-id={row.Id}
+                                                onclick={handleSuggestedEditPrice}>
+                                            </lightning-button-icon>
+                                        </template>
+                                    </template>
+                                    <template if:true={row.isEditingPrice}>
+                                        <lightning-input type="number" step="0.01" name="price"
+                                            value={row.List_Price__c} data-index={row.originalIndex} data-id={row.Id}
+                                            onchange={handleSuggestedInputChange} onblur={handleSuggestedPriceBlur}
+                                            variant="label-hidden">
+                                        </lightning-input>
+                                    </template>
+                                </td>
+                                <td>
+                                    <lightning-input name="qty" disabled={row.isDisableQty} type="number"
+                                        value={row.Quantity} data-index={row.originalIndex} data-id={row.Id}
+                                        onchange={handleSuggestedInputChange} variant="label-hidden">
+                                    </lightning-input>
+                                </td>
+                                <td><span if:true={row.amount}>₹ {row.amount}</span></td>
+                                <td>
+                                    <lightning-input name="discount" disabled={row.isDisableQty} type="number"
+                                        value={row.Discount} data-index={row.originalIndex} data-id={row.Id}
+                                        onchange={handleSuggestedInputChange} variant="label-hidden">
+                                    </lightning-input>
+                                </td>
+                                <td><span if:true={row.discountAmount}>₹ {row.discountAmount}</span></td>
+                                <td><span if:true={row.afterDiscount}>₹ {row.afterDiscount}</span></td>
+                                <td>
+                                    <lightning-input name="gst" disabled={row.isDisableQty} type="number"
+                                        value={row.gst} data-index={row.originalIndex} data-id={row.Id}
+                                        onchange={handleSuggestedInputChange} variant="label-hidden">
+                                    </lightning-input>
+                                </td>
+                                <td><span if:true={row.gstAmount}>₹ {row.gstAmount}</span></td>
+                                <td><span if:true={row.TotalAmount}>₹ {row.TotalAmount}</span></td>
+                                <td>
+                                    <lightning-input name="promiseDate" disabled={row.isDisableQty} type="date"
+                                        value={row.promiseDate} data-index={row.originalIndex} data-id={row.Id}
+                                        onchange={handleSuggestedInputChange} variant="label-hidden">
+                                    </lightning-input>
+                                </td>
+                                <td>
+                                    <lightning-combobox name="priority" value={row.priority} options={priorityOptions}
+                                        onchange={handleSuggestedInputChange} data-index={row.originalIndex}
+                                        data-id={row.Id} disabled={row.isPriorityDisable} variant="label-hidden">
+                                    </lightning-combobox>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination Controls for Suggested Products -->
+            <div class="sticky-footer slds-m-top_medium slds-align_absolute-center" if:false={disablePaginationSuggestedProducts}>
+                <lightning-button label="Previous" onclick={handleSuggestedPrevPage} disabled={isFirstSuggestedPage}>
+                </lightning-button>
+                <span class="slds-m-horizontal_medium">Page {currentSuggestedPage} of {totalSuggestedPages}</span>
+                <lightning-button label="Next" onclick={handleSuggestedNextPage} disabled={isLastSuggestedPage}>
+                </lightning-button>
+            </div>
+        </template>
+    </div>
+</template>

@@ -1,0 +1,58 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 10-12-2026
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<template>
+    <lightning-card title={cardTitle} icon-name="standard:orders" class="slds-m-around_medium">
+
+        <template if:true={isLoading}>
+            <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+        </template>
+
+        <template if:false={isLoading}>
+            <lightning-tabset variant="scoped">
+
+                <lightning-tab label={myTabLabel} icon-name="utility:user">
+                    <template if:true={hasMyRecords}>
+                        <c-sales-order-list is-community={isCommunity} orders={myRecords} status-steps={statusSteps}
+                            show-owner-column="false" module-key={moduleKey} module-label={moduleLabel}>
+                        </c-sales-order-list>
+                    </template>
+                    <template if:false={hasMyRecords}>
+                        <div class="slds-var-p-around_medium slds-text-align_center slds-text-color_weak">
+                            {emptyMessage}
+                        </div>
+                    </template>
+                </lightning-tab>
+
+                <template if:true={isAdmin}>
+                    <lightning-tab label="Team Progress" icon-name="utility:people">
+
+                        <div class="team-datatable-container">
+                            <lightning-datatable key-field="userId" data={teamSummary} columns={teamColumns}
+                                hide-checkbox-column="true" onrowaction={handleTeamRowAction}>
+                            </lightning-datatable>
+                        </div>
+
+                        <template if:true={hasSelectedUser}>
+                            <div class="slds-var-p-top_medium">
+                                <lightning-card>
+                                    <c-sales-order-list   is-community={isCommunity} orders={selectedUserRecords} status-steps={statusSteps}
+                                        show-owner-column="false" module-key={moduleKey} module-label={moduleLabel}
+                                        selected-user-title={selectedUserTitle}>
+                                    </c-sales-order-list>
+                                </lightning-card>
+                            </div>
+                        </template>
+
+                    </lightning-tab>
+                </template>
+
+            </lightning-tabset>
+        </template>
+
+    </lightning-card>
+</template>

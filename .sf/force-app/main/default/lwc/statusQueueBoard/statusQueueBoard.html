@@ -1,0 +1,33 @@
+<template>
+    <lightning-card title={columnTitle} icon-name="standard:record">
+
+        <span slot="actions">
+            <lightning-badge label={countLabel}></lightning-badge>
+        </span>
+
+        <template if:true={isLoading}>
+            <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+        </template>
+
+        <template if:false={isLoading}>
+
+            <template if:true={hasRecords}>
+                <lightning-accordion allow-multiple-sections-open>
+                    <template for:each={records} for:item="rec">
+                        <lightning-accordion-section key={rec.id} name={rec.id} label={rec.summaryLabel}>
+                            <c-challan-record-details record-id={rec.id} onstatusupdate={publishStatusChange}></c-challan-record-details>
+                        </lightning-accordion-section>
+                    </template>
+                </lightning-accordion>
+            </template>
+
+            <template if:false={hasRecords}>
+                <div class="slds-var-p-around_medium slds-text-align_center slds-text-color_weak">
+                    {emptyMessage}
+                </div>
+            </template>
+
+        </template>
+
+    </lightning-card>
+</template>

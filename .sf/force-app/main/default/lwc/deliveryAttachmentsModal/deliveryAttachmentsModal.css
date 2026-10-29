@@ -1,0 +1,122 @@
+/* Card Header Custom Styling - Prevents ellipsis / truncation */
+.card-custom-title {
+    white-space: normal;
+    word-break: break-word;
+    display: inline-block;
+    font-weight: 700;
+}
+
+.card-actions {
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Scrollable Card Body Container */
+.custom-card-body {
+    max-height: 22rem;
+    /* Requirement ke anusar height adjust kar sakte hain */
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Salesforce Standard Border and Separator */
+.category-container {
+    border-bottom: 1px solid var(--slds-g-color-border-base-1, #e5e5ea);
+}
+
+.category-container:last-child {
+    border-bottom: none;
+}
+
+/* File Chip - Native Salesforce styling */
+.file-chip {
+    cursor: pointer;
+    border-radius: var(--slds-c-card-radius-border, 0.25rem);
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+    min-height: 2.25rem;
+}
+
+.file-chip:hover {
+    background-color: var(--slds-g-color-surface-container-highest, #eef4f9);
+    border-color: var(--slds-g-color-brand-base-50, #0176d3);
+}
+
+/* Preview Link */
+.preview-link {
+    cursor: pointer;
+    color: var(--slds-g-color-brand-base-50, #0176d3);
+}
+
+.preview-link:hover {
+    text-decoration: underline;
+}
+
+/* Upload Action Button */
+.responsive-upload-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+/* Pill Truncation */
+.custom-pill {
+    max-width: 100%;
+}
+
+.custom-pill .slds-pill__label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ======================================================== */
+/* MOBILE & TABLET PORTRAIT RESPONSIVE STYLES (< 1024px)   */
+/* ======================================================== */
+@media screen and (max-width: 1024px) {
+    .card-custom-title {
+        font-size: 0.8125rem;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .custom-card-body {
+        max-height: 18rem;
+    }
+
+    .mobile-modal-container {
+        width: 95% !important;
+        max-width: 95% !important;
+        margin: 1rem auto !important;
+        padding: 0 !important;
+    }
+
+    .mobile-modal-content {
+        max-height: 70vh !important;
+        overflow-y: auto !important;
+    }
+
+    .upload-btn-col {
+        text-align: left;
+        margin-top: 0.25rem;
+    }
+
+    .responsive-upload-btn {
+        width: 100%;
+        padding: 0.5rem 1rem;
+    }
+
+    .mobile-footer {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .mobile-footer lightning-button {
+        flex: 1;
+        text-align: center;
+    }
+
+    .mobile-footer lightning-button button {
+        width: 100%;
+    }
+}

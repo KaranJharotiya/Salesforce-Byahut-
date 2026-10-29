@@ -1,0 +1,21 @@
+<apex:page standardController="Sales_Order__c" recordSetVar="selectedSOs" lightningStylesheets="true" showHeader="false" sidebar="false">
+    <apex:includeLightning />
+    
+    <div id="lwcHost" />
+
+    <script>
+        var selectedIds = [];
+        <apex:repeat value="{!selected}" var="so">
+            selectedIds.push('{!so.Id}');
+        </apex:repeat>
+
+        $Lightning.use("c:CreateChallanApp", function() {
+            $Lightning.createComponent(
+                "c:createChallanLwc",
+                { recordIds: selectedIds },
+                "lwcHost",
+                function(cmp) {}
+            );
+        });
+    </script>
+</apex:page>

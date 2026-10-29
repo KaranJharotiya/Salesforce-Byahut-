@@ -1,0 +1,35 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 09-09-2026
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<template>
+    <lightning-quick-action-panel header={header}>
+        <lightning-layout multiple-rows>
+            <!-- Show Team Selection only for Sales Team & System Administrator -->
+            <template lwc:if={showTeamSelection}>
+                <lightning-layout-item size="6" padding="around-small">
+                    <lightning-radio-group name="teamGroup" label="Assign To Team" options={teamOptions}
+                        value={selectedTeam} type="button" onchange={handleTeamChange} required>
+                    </lightning-radio-group>
+                </lightning-layout-item>
+            </template>
+
+            <lightning-layout-item size="6" padding="around-small">
+                <lightning-record-picker object-api-name="User" label="Select User" filter={activeFilter}
+                    display-info={displayInfo} value={selectedUserId} onchange={handleUserChange} required
+                    class="validate">
+                </lightning-record-picker>
+            </lightning-layout-item>
+        </lightning-layout>
+
+        <div slot="footer" class="slds-text-align_right">
+            <lightning-button-group>
+                <lightning-button label="Cancel" onclick={closeModal} variant="neutral"></lightning-button>
+                <lightning-button label="Assign" onclick={handleFooterSave} variant="brand"></lightning-button>
+            </lightning-button-group>
+        </div>
+    </lightning-quick-action-panel>
+</template>

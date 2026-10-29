@@ -1,0 +1,58 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 05-09-2026
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<template>
+    <lightning-card title="Today's To-Do List" icon-name="standard:task">
+
+<div slot="actions" class="slds-grid slds-gutters_x-small">
+
+    <lightning-button-icon icon-name="utility:edit" alternative-text="Edit" title="Edit" onclick={handleEditRecord}
+        class="slds-m-right_x-small">
+    </lightning-button-icon>
+
+    <lightning-button-icon icon-name="utility:refresh" alternative-text="Refresh" title="Refresh"
+        onclick={handleRefresh}>
+    </lightning-button-icon>
+
+</div>
+        <template if:true={checkTodayTaskLength}>
+            <div class="slds-p-around_medium">
+
+                <template for:each={todayTasklst} for:item="task" for:index="index">
+                    <div key={task} class="todo-item">
+
+                        <div class="serial-number">
+                            {index + 1}.
+                        </div>
+
+                        <div class="task-text">
+                            {task}
+                        </div>
+
+                    </div>
+                </template>
+
+            </div>
+        </template>
+
+<template if:false={checkTodayTaskLength}>
+
+    <div class="slds-p-around_medium slds-text-align_center">
+
+        <div class="slds-text-color_weak slds-m-bottom_medium">
+            No Tasks Available For Today
+        </div>
+
+        <lightning-button label="New To-Do List" variant="brand" onclick={handleNewRecord}>
+        </lightning-button>
+
+    </div>
+
+</template>
+
+    </lightning-card>
+</template>

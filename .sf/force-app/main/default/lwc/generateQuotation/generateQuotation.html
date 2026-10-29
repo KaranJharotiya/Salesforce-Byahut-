@@ -1,0 +1,56 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 09-03-2026
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<template>
+    <lightning-card title="Generate & Preview Quotation" icon-name="standard:quotes">
+        <!-- Spinner -->
+        <lightning-spinner if:true={isLoading} alternative-text="Loading" size="medium"></lightning-spinner>
+
+        <!-- Main Card Body -->
+        <div class="slds-p-around_medium">
+            <template if:true={hasQuotations}>
+                <!-- Step 1: Select Quotation Dropdown -->
+                <lightning-combobox name="quotationSelector" label="Select Quotation" value={selectedQuotation}
+                    placeholder="-- Select Quotation --" options={quotationOptions} onchange={handleQuotationChange}
+                    required>
+                </lightning-combobox>
+
+                <!-- Step 2: Columns Selection -->
+                <template if:true={isQuotationSelected}>
+                    <div class="slds-m-top_medium slds-box slds-box_xx-small slds-theme_shade">
+                        <lightning-checkbox-group label="Select Additional Columns" options={options} value={value}
+                            onchange={handleChange}>
+                        </lightning-checkbox-group>
+                    </div>
+                </template>
+            </template>
+
+            <!-- Empty State Message -->
+            <template if:false={isLoading}>
+                <template if:false={hasQuotations}>
+                    <div class="slds-illustration slds-illustration_small slds-p-vertical_large slds-text-align_center">
+                        <div class="slds-text-heading_small slds-text-color_error slds-text-title_bold">
+                            No Quotations found for this Record.
+                        </div>
+                    </div>
+                </template>
+            </template>
+        </div>
+
+        <!-- Card Footer for Buttons -->
+        <template if:true={hasQuotationLineItemBoolean}>
+            <div slot="footer" class="slds-grid slds-grid_align-end">
+                <lightning-button class="slds-m-right_x-small" label="Cancel" onclick={handleClose}>
+                </lightning-button>
+
+                <lightning-button label="Preview Quotation" variant="brand" disabled={isPreviewDisabled}
+                    onclick={handlePreviewQuotation}>
+                </lightning-button>
+            </div>
+        </template>
+    </lightning-card>
+</template>

@@ -1,0 +1,156 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 10-20-2026
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<template>
+    <lightning-card title="Generate Purchase Orders" icon-name="standard:orders">
+
+        <template if:true={isLoading}>
+            <lightning-spinner alternative-text="Loading..." size="medium"></lightning-spinner>
+        </template>
+
+        <div class="slds-p-around_medium">
+            <template if:true={hasVendorGroups}>
+                <lightning-accordion allow-multiple-sections-open active-section-name={activeSections}>
+                    <template for:each={vendorGroups} for:item="vg">
+                        <lightning-accordion-section key={vg.vendorId} name={vg.vendorId} label={vg.sectionLabel}
+                            class="slds-card slds-card_boundary slds-m-bottom_small">
+
+                            <div class="slds-m-top_xx-small slds-scrollable_x">
+                                <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped">
+                                    <thead>
+                                        <tr class="slds-line-height_reset" style="background-color: #f3f3f3;">
+                                            <th scope="col">
+                                                <div class="slds-truncate slds-text-title_bold" title="Product">Product
+                                                </div>
+                                            </th>
+                                            <th scope="col" style="width: 130px;">
+                                                <div class="slds-truncate slds-text-title_bold" title="Quantity">
+                                                    Quantity</div>
+                                            </th>
+                                            <th scope="col" style="width: 150px;">
+                                                <div class="slds-truncate slds-text-title_bold" title="Rate">Rate</div>
+                                            </th>
+                                            <th scope="col" style="width: 130px;">
+                                                <div class="slds-truncate slds-text-title_bold" title="Discount (%)">
+                                                    Discount (%)</div>
+                                            </th>
+                                            <th scope="col" style="width: 130px;">
+                                                <div class="slds-truncate slds-text-title_bold" title="GST (%)">GST (%)
+                                                </div>
+                                            </th>
+                                            <th scope="col" style="width: 160px;">
+                                                <div class="slds-truncate slds-text-title_bold"
+                                                    title="Delivery/Transportation Charges">
+                                                    Delivery/Transportation Charges</div>
+                                            </th>
+                                            <th scope="col" style="width: 220px;">
+                                                <div class="slds-truncate slds-text-title_bold"
+                                                    title="Other Applicable Commercial Terms">
+                                                    Other Applicable Commercial Terms</div>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template for:each={vg.lineItems} for:item="item">
+                                            <tr key={item.ivrId} class="slds-hint-parent">
+                                                <td>
+                                                    <div
+                                                        class="slds-truncate slds-text-body_regular slds-text-title_bold">
+                                                        {item.productName}
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="slds-truncate slds-text-body_regular">
+                                                        {item.quantity}
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="slds-truncate slds-text-body_regular">
+                                                        {item.rate}
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="slds-truncate slds-text-body_regular"
+                                                        if:true={item.discount}>
+                                                        {item.discount}%
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="slds-truncate slds-text-body_regular"
+                                                        if:true={item.gst}>
+                                                        {item.gst}%
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="slds-truncate slds-text-body_regular">
+                                                        <lightning-formatted-number value={item.deliveryCharges}
+                                                            format-style="currency" currency-code="INR">
+                                                        </lightning-formatted-number>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="slds-truncate slds-text-body_regular"
+                                                        title={item.commercialTerms}>
+                                                        {item.commercialTerms}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Delivery Detail Inputs for Each Vendor Table -->
+                            <div class="slds-box slds-box_x-small slds-theme_shade slds-m-top_small">
+                                <div class="slds-text-title_bold slds-m-bottom_x-small">
+                                    Delivery Details
+                                </div>
+                                <div class="slds-grid slds-wrap slds-gutters">
+                                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
+                                        <lightning-input type="date" label="Expected Delivery Date"
+                                            data-vendor-id={vg.vendorId} data-field="expectedDeliveryDate"
+                                            value={vg.expectedDeliveryDate} onchange={handleDeliveryFieldChange}
+                                            required>
+                                        </lightning-input>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
+                                        <lightning-input type="text" label="Tracking Number"
+                                            data-vendor-id={vg.vendorId} data-field="trackingNumber"
+                                            value={vg.trackingNumber} onchange={handleDeliveryFieldChange}>
+                                        </lightning-input>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
+                                        <lightning-input type="text" label="Tracking URL" 
+                                            data-vendor-id={vg.vendorId} data-field="trackingUrl" value={vg.trackingUrl}
+                                            onchange={handleDeliveryFieldChange}>
+                                        </lightning-input>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </lightning-accordion-section>
+                    </template>
+                </lightning-accordion>
+            </template>
+
+            <template if:false={hasVendorGroups}>
+                <div class="slds-box slds-text-align_center slds-p-around_large slds-text-color_weak slds-theme_shade">
+                    No approved vendor rates available for generating PO.
+                </div>
+            </template>
+        </div>
+
+        <div slot="footer" class="slds-p-top_x-small slds-border_top slds-grid slds-grid_align-center">
+            <lightning-button variant="neutral" label="Cancel" onclick={handleCloseModal} class="slds-m-right_small">
+            </lightning-button>
+            <lightning-button variant="brand" label="Confirm &amp; Generate PO" onclick={handleGeneratePO}
+                disabled={isGenerateDisabled}>
+            </lightning-button>
+        </div>
+
+    </lightning-card>
+</template>

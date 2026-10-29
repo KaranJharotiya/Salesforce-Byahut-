@@ -1,0 +1,44 @@
+.table-wrapper {
+    margin-top: 10px;
+    max-height: 300px;       /* ✅ vertical scroll area */
+    overflow-y: auto;        /* ✅ vertical scroll */
+    overflow-x: auto;        /* ✅ horizontal scroll */
+    border-radius: 0.8rem;
+    border: 1px solid #d8dde6;
+}
+
+/* Table */
+.custom-table {
+    width: 100%;
+    min-width: 1200px;       /* ✅ ensure horizontal scroll */
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+
+
+/* Header */
+.custom-table thead th {
+    position: sticky;        /* ✅ sticky header */
+    top: 0;
+    z-index: 5;
+    background: #f3f2f2;
+
+    border-right: 1px solid #d8dde6;
+    padding: 0.75rem;
+    text-align: center;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* Body cells */
+.custom-table tbody td {
+    border-bottom: 1px solid #e5e5e5;
+    padding: 0.75rem;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.custom-table tbody tr:hover {
+    background-color: #f9f9f9;
+}

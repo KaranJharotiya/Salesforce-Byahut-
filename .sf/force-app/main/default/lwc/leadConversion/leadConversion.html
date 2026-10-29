@@ -1,0 +1,39 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 08-13-2026
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<template>
+    <lightning-modal-header label="Convert Lead"></lightning-modal-header>
+
+    <lightning-spinner if:true={isLoading} alternative-text="Loading" size="medium"></lightning-spinner>
+    
+    <lightning-card>
+
+        <!-- <lightning-modal-body style="padding:20px;"> Do you want to convert this Lead? </lightning-modal-body> -->
+        <div if:false={isLeadConverted}
+            style="min-height: 100px; font-weight:bold; display: flex; align-items: center; justify-content: center;">
+            Do you want to convert this Lead?
+        </div>
+
+        <template if:true={isGstMissing}>
+            <div style="padding: 0 30px 20px 30px; width: 50%;">
+                <lightning-input type="text" label="GST Number" value={gstNumber} onchange={handleGstChange}
+                    placeholder="Enter GST Number" required>
+                </lightning-input>
+            </div>
+        </template>
+        <div if:true={isLeadConverted}
+            style="min-height: 100px; font-weight:bold; display: flex; align-items: center; justify-content: center; color:red; font-size:18px;">
+            Lead has been already converted.
+        </div>
+
+    </lightning-card>
+
+    <lightning-modal-footer if:false={isLeadConverted}>
+        <lightning-button style="margin-right:10px;" label="Cancel" onclick={handleConvertCancel}></lightning-button>
+        <lightning-button label="Convert" variant="brand" onclick={handleConvert}></lightning-button>
+    </lightning-modal-footer>
+</template>

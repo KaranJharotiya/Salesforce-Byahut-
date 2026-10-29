@@ -1,0 +1,198 @@
+<apex:page standardController="Purchase_Order__c"
+           extensions="PoPdfController" applyHtmlTag="false" showHeader="false" renderAs="PDF" language="us-US" cache="false">
+    
+    
+    <html>
+        <head>
+            
+            <style>
+                table, tr, th, td{
+                border-collapse:collapse;
+                border:1px solid #999;
+                min-height: 20px;
+                }
+                .horizontalCenter{
+                text-align:center;
+                }
+                .verticalCenter{
+                vertical-align: middle;
+                }
+                .marginZero{
+                margin:0;
+                }
+                .paddingZero{
+                padding:0;
+                }
+                .borderTopNone{
+                border-top:none;
+                }
+                .borderBottomNone{
+                border-bottom:none;
+                }
+                .borderRightNone{
+                border-right:none;
+                }
+                .borderLeftNone{
+                border-left:none;
+                }
+            </style>
+            
+            
+            <table style="width:100%; font-family:Arial; font-size:13px;">
+                <tr class="borderBottomNone">
+                    <td class="borderBottomNone borderRightNone" style="width:20%;"><img src="{!URLFOR($Resource.ByahutPdfLogo)}" style="height: 50px; margin-top:10px; margin-left:10px;" /></td>
+                    <td class="borderBottomNone borderLeftNone borderRightNone" style="width:60%"></td>
+                    <td class="borderBottomNone borderLeftNone" style="width:20%"></td>
+                </tr>
+                <tr class="borderTopNone">
+                    <td class="borderTopNone borderRightNone" style="width:20%"></td>
+                    <td class="borderTopNone borderLeftNone borderRightNone" style="width:60%; text-align:center;">
+                        <h2 class="marginZero paddingZero">
+                            BYAHUT SCIENTICO
+                        </h2>
+                        <p class="marginZero paddingZero">
+                            A2, Bhawani Niketan Vistar, Near Vishnu Oil Mill,
+                        </p>
+                        <p class="marginZero paddingZero">
+                            Jhotwara Industrial Area, Jaipur - 302012 (Rajasthan, IN)
+                        </p>
+                        <p class="marginZero paddingZero">
+                            GST No.: 08BDJPG0112Q1ZJ
+                        </p>
+                        <p class="marginZero paddingZero">
+                            Contact: +91-9414065135, 7976273530
+                        </p>
+                        <p class="marginZero paddingZero">
+                            Email: byahutscientico1@gmail.com
+                        </p>
+                        
+                    </td>
+                    <td class="borderTopNone borderLeftNone" style="width:20%"></td>
+                </tr>
+            </table>
+            
+            <br/>
+            
+            <table border="1" style="width:100%; font-family:Arial; font-size:13px;">
+                <tr>
+                    <td style="width:25%;" >PO Number</td>
+                    <td style="width:25%;">{!po.Name}</td>
+                    <td style="width:25%;">PO Date</td>
+                    <td style="width:25%;">
+                        <apex:outputText value="{0,date,dd-MM-yyyy}">
+                            <apex:param value="{!po.CreatedDate}" />
+                        </apex:outputText>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width:25%;">Vendor’s Name</td>
+                    <td style="width:25%;">{!po.Vendor_Master__r.Name} {!po.Vendor_Master__r.Last_Name__c}</td>
+                    <td style="width:25%;">Vendor ‘s GST No</td>
+                    <td style="width:25%;">{!po.Vendor_Master__r.GST__c}</td>
+                </tr>
+                <tr>
+                    <td style="width:25%;">Vendor’s Address</td>
+                    <td style="width:25%;">{!po.Vendor_Master__r.Address__c}</td>
+                    <td style="width:25%;">Inco-Terms</td>
+                    <td style="width:25%;"></td>
+                </tr>
+                <tr>
+                    <td style="width:25%;">Shipping Address </td>
+                    <td style="width:25%;">{!po.Vendor_Master__r.Address__c}</td>
+                    <td style="width:25%;"></td>
+                    <td style="width:25%;"></td>
+                </tr>
+            </table>
+            
+            <br/>
+            
+            <table border="1" style="width:100%; font-family:Arial; font-size:13px;">
+                <tr class="horizontalCenter verticalCenter" >
+                    <th>S.No.</th>
+                    <th>Item Name</th>
+                    <th>Item Code</th>
+                    <th>Pack Size</th>
+                    <th>Qty</th>
+                    <th>Rate</th>
+                    <th>Discount%</th>
+                    <th>GST%</th>
+                    <th>Amount</th>
+                </tr>
+                
+                <apex:variable value="{!1}" var="sno"/>
+                <apex:repeat value="{!poli}" var="item">
+                    <tr class="horizontalCenter" style="font-size:13px;">
+                        <td>{!sno}</td>
+                        <td>{!item.Product__r.Name}</td>
+                        <td>{!item.Product__r.Code__c}</td>
+                        <td>{!item.Product__r.Pack_Size__c}</td>
+                        <td>{!item.Quantity__c}</td>
+                        <td>{!item.Unit_Price__c}</td>
+                        <td>{!item.Discount__c}</td>
+                        <td>{!item.GST__c}</td>
+                        <td>{!item.Amount__c}</td>
+                    </tr>
+                    <apex:variable value="{!sno+1}" var="sno"/>
+                </apex:repeat>
+                
+            </table>
+            
+            <br/>
+            
+            <table border="1" style="width:100%; font-family:Arial; font-size: 13px;">
+                <tr>
+                    <td style="width:50%;">Subtotal</td>
+                    <td style="width:50%;">{!po.Grand_Total_Without_GST__c}</td>
+                </tr>
+                <tr>
+                    <td style="width:50%;">GST Total</td>
+                    <td style="width:50%;">{!po.Total_GST_Amount__c}</td>
+                </tr>
+                <tr>
+                    <td style="width:50%;">Grand Total</td>
+                    <td style="width:50%;">{!po.Total_Amount__c}</td>
+                </tr>
+            </table>
+            
+            <br/>
+            
+            <h3 style="color:#4f81bf;">
+                Terms &amp; Conditions
+            </h3>
+            
+            <p>
+                <span>1. </span> <span>Please supply the above material as per agreed specifications.</span>
+            </p>
+            
+            <p>
+                <span>2. </span> <span>Delivery timeline: </span> 
+                <span style="display:inline-block; width:150px; border-bottom:1px solid #999;">{!po.Delivery_Timeline__c}</span>
+            </p>
+            
+            <p>
+                <span>3. </span> <span>Payment terms: </span>
+                <span style="display:inline-block; width:150px; border-bottom:1px solid #999;">{!po.Payment_Terms__c}</span>
+            </p>
+            
+            <br/>
+            
+            
+            <table border="1" style="width:100%; font-family:Arial: font-size:13px;">
+                <tr>
+                    <td style="width:33%; height:20px;">Prepared By</td>
+                    <!--   <td style="width:33%; height:20px;"></td> -->
+                    <td style="width:33%; height:20px;">Authorized Signatory</td>
+                </tr>
+                <tr>
+                    <td style="width:33%; height:20px;">{!po.CreatedBy.Name}</td>
+                    <td style="width:33%; height:20px;"></td>
+                 <!--   <td style="width:33%; height:20px;"></td> -->
+                </tr>
+            </table>
+            
+        </head>
+        <body>
+        </body>
+    </html>
+    
+</apex:page>

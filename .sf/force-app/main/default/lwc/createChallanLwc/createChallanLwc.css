@@ -1,0 +1,44 @@
+.custom-container {
+    max-width: 860px;
+    margin: 2rem auto;
+}
+
+.info-pill {
+    background-color: #f3f3f3;
+    border-left: 4px solid #0176d3;
+    padding: 8px 14px;
+    border-radius: 4px;
+}
+
+.card-header-bg,
+.card-footer-bg {
+    border-bottom: 1px solid #e5e5e5;
+    background: #fafaf9;
+}
+
+.card-footer-bg {
+    border-top: 1px solid #e5e5e5;
+}
+
+.font-bold {
+    font-weight: 700;
+}
+
+.font-semibold {
+    font-weight: 600;
+}
+
+.table-header-title {
+    font-weight: 700;
+    color: #514f4d;
+}
+
+.table-container {
+    border-radius: 4px;
+    overflow: hidden;
+    overflow-x: auto;
+}
+
+.table-head-bg {
+    background-color: #f8f9fa;
+}

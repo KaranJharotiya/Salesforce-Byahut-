@@ -1,0 +1,9 @@
+.truncate {
+    display: inline-block;
+    max-width: 60px; /* adjust based on layout */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: blue;
+    cursor: pointer;
+}

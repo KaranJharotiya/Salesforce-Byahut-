@@ -1,0 +1,299 @@
+<!--
+  @description       : Notes & Attachments Manager
+  @last modified on  : 10-19-2026
+-->
+<template>
+    <!-- RECORD PAGE CARD -->
+    <lightning-card icon-name="standard:file" class="responsive-card">
+        <!-- CUSTOM TITLE SLOT (Prevents truncation) -->
+        <span slot="title" class="card-custom-title slds-text-heading_small slds-m-right_xx-small">
+            Notes & Attachments
+        </span>
+
+        <div slot="actions" class="card-actions slds-m-vertical_xx-small">
+            <lightning-button label="Edit / Manage" icon-name="utility:edit" onclick={openModal}>
+            </lightning-button>
+        </div>
+
+        <!-- SLDS SCROLLABLE CONTAINER -->
+        <div class="slds-p-around_small slds-scrollable_y custom-card-body">
+            <template if:true={isLoading}>
+                <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+            </template>
+
+            <!-- SECTION 1: Transporter POD -->
+            <div class="category-container slds-p-bottom_small slds-m-bottom_medium">
+                <div class="slds-grid slds-grid_vertical-align-center slds-wrap">
+                    <span class="slds-text-title_bold slds-text-color_default">1. Transporter POD</span>
+                </div>
+                <div class="slds-p-top_x-small">
+                    <template if:true={hasTransporterPodFiles}>
+                        <template for:each={transporterPodFiles} for:item="file">
+                            <div key={file.id} class="slds-col slds-size_1-of-1 slds-p-vertical_xx-small">
+                                <div class="file-chip slds-box slds-box_x-small slds-grid slds-grid_vertical-align-center slds-theme_shade"
+                                    data-id={file.id} onclick={handlePreview}>
+                                    <lightning-icon icon-name="doctype:attachment" size="small"
+                                        class="slds-m-right_small slds-no-flex"></lightning-icon>
+                                    <span class="slds-truncate slds-text-link_reset slds-text-color_default"
+                                        title={file.title}>{file.title}</span>
+                                    <lightning-icon icon-name="utility:preview" size="xx-small"
+                                        class="slds-col_bump-left slds-icon-text-weak slds-no-flex"></lightning-icon>
+                                </div>
+                            </div>
+                        </template>
+                    </template>
+                    <template if:false={hasTransporterPodFiles}>
+                        <p class="slds-text-color_weak slds-p-left_small slds-text-body_small">No Transporter POD
+                            uploaded yet.</p>
+                    </template>
+                </div>
+            </div>
+
+            <!-- SECTION 2: Customer POD -->
+            <div class="category-container slds-p-bottom_small slds-m-bottom_medium">
+                <div class="slds-grid slds-grid_vertical-align-center slds-wrap">
+                    <span class="slds-text-title_bold slds-text-color_default">2. Customer POD</span>
+                </div>
+                <div class="slds-p-top_x-small">
+                    <template if:true={hasCustomerPodFiles}>
+                        <template for:each={customerPodFiles} for:item="file">
+                            <div key={file.id} class="slds-col slds-size_1-of-1 slds-p-vertical_xx-small">
+                                <div class="file-chip slds-box slds-box_x-small slds-grid slds-grid_vertical-align-center slds-theme_shade"
+                                    data-id={file.id} onclick={handlePreview}>
+                                    <lightning-icon icon-name="doctype:attachment" size="small"
+                                        class="slds-m-right_small slds-no-flex"></lightning-icon>
+                                    <span class="slds-truncate slds-text-link_reset slds-text-color_default"
+                                        title={file.title}>{file.title}</span>
+                                    <lightning-icon icon-name="utility:preview" size="xx-small"
+                                        class="slds-col_bump-left slds-icon-text-weak slds-no-flex"></lightning-icon>
+                                </div>
+                            </div>
+                        </template>
+                    </template>
+                    <template if:false={hasCustomerPodFiles}>
+                        <p class="slds-text-color_weak slds-p-left_small slds-text-body_small">No Customer POD uploaded
+                            yet.</p>
+                    </template>
+                </div>
+            </div>
+
+            <!-- SECTION 3: Docket Copy -->
+            <div class="category-container slds-p-bottom_small">
+                <div class="slds-grid slds-grid_vertical-align-center slds-wrap">
+                    <span class="slds-text-title_bold slds-text-color_default">3. Docket Copy</span>
+                    <span class="slds-badge slds-theme_shade slds-m-left_small">Optional</span>
+                </div>
+                <div class="slds-p-top_x-small">
+                    <template if:true={hasDocketCopyFiles}>
+                        <template for:each={docketCopyFiles} for:item="file">
+                            <div key={file.id} class="slds-col slds-size_1-of-1 slds-p-vertical_xx-small">
+                                <div class="file-chip slds-box slds-box_x-small slds-grid slds-grid_vertical-align-center slds-theme_shade"
+                                    data-id={file.id} onclick={handlePreview}>
+                                    <lightning-icon icon-name="doctype:attachment" size="small"
+                                        class="slds-m-right_small slds-no-flex"></lightning-icon>
+                                    <span class="slds-truncate slds-text-link_reset slds-text-color_default"
+                                        title={file.title}>{file.title}</span>
+                                    <lightning-icon icon-name="utility:preview" size="xx-small"
+                                        class="slds-col_bump-left slds-icon-text-weak slds-no-flex"></lightning-icon>
+                                </div>
+                            </div>
+                        </template>
+                    </template>
+                    <template if:false={hasDocketCopyFiles}>
+                        <p class="slds-text-color_weak slds-p-left_small slds-text-body_small">No Docket Copy uploaded
+                            yet.</p>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </lightning-card>
+
+    <!-- ================= EDIT / MANAGE POPUP MODAL ================= -->
+    <template if:true={isModalOpen}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_medium">
+            <div class="slds-modal__container mobile-modal-container">
+
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                        title="Close" onclick={closeModal}>
+                        <lightning-icon icon-name="utility:close" alternative-text="close"
+                            size="small"></lightning-icon>
+                    </button>
+                    <h2 class="slds-text-heading_medium slds-hyphenate">Manage Attachments</h2>
+                </header>
+
+                <div class="slds-modal__content slds-p-around_medium mobile-modal-content">
+                    <template if:true={isLoadingModal}>
+                        <lightning-spinner alternative-text="Saving" size="medium"></lightning-spinner>
+                    </template>
+
+                    <!-- Section 1 Modal: Transporter POD -->
+                    <div class="slds-box slds-m-bottom_medium slds-theme_default">
+                        <div class="slds-grid slds-grid_vertical-align-center slds-wrap slds-m-bottom_small">
+                            <h3
+                                class="slds-text-title_bold slds-col slds-size_1-of-1 slds-medium-size_8-of-12 slds-m-bottom_xx-small">
+                                Transporter POD <span class="slds-text-color_error">*</span>
+                            </h3>
+                            <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 upload-btn-col">
+                                <input type="file" id="transporterInput" class="slds-hide"
+                                    data-category="Transporter POD" onchange={handleFileSelect} multiple />
+                                <label for="transporterInput"
+                                    class="slds-button slds-button_neutral responsive-upload-btn">
+                                    <lightning-icon icon-name="utility:upload" size="xx-small"
+                                        class="slds-m-right_x-small"></lightning-icon>
+                                    Choose Files
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Existing Files -->
+                        <div class="slds-pill_container_bare">
+                            <template for:each={transporterPodFiles} for:item="file">
+                                <span key={file.id} class="slds-pill slds-m-around_xx-small custom-pill">
+                                    <span class="slds-pill__icon_container">
+                                        <lightning-icon icon-name="doctype:attachment" size="x-small"></lightning-icon>
+                                    </span>
+                                    <span class="slds-pill__label preview-link" data-id={file.id}
+                                        onclick={handlePreview}>{file.title}</span>
+                                    <button class="slds-button slds-button_icon slds-pill__remove" title="Delete"
+                                        data-id={file.id} onclick={handleExistingDelete}>
+                                        <lightning-icon icon-name="utility:close" size="xx-small"></lightning-icon>
+                                    </button>
+                                </span>
+                            </template>
+
+                            <!-- Newly Selected (Pending) Files -->
+                            <template for:each={pendingTransporterFiles} for:item="pfile" for:index="index">
+                                <span key={pfile.fileName}
+                                    class="slds-pill slds-theme_shade slds-m-around_xx-small custom-pill">
+                                    <span class="slds-pill__icon_container">
+                                        <lightning-icon icon-name="utility:new" size="x-small"></lightning-icon>
+                                    </span>
+                                    <span class="slds-pill__label">{pfile.fileName} <i>(Pending)</i></span>
+                                    <button class="slds-button slds-button_icon slds-pill__remove" title="Remove"
+                                        data-category="Transporter POD" data-index={index}
+                                        onclick={handleRemovePendingFile}>
+                                        <lightning-icon icon-name="utility:close" size="xx-small"></lightning-icon>
+                                    </button>
+                                </span>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Section 2 Modal: Customer POD -->
+                    <div class="slds-box slds-m-bottom_medium slds-theme_default">
+                        <div class="slds-grid slds-grid_vertical-align-center slds-wrap slds-m-bottom_small">
+                            <h3
+                                class="slds-text-title_bold slds-col slds-size_1-of-1 slds-medium-size_8-of-12 slds-m-bottom_xx-small">
+                                Customer POD <span class="slds-text-color_error">*</span>
+                            </h3>
+                            <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 upload-btn-col">
+                                <input type="file" id="customerInput" class="slds-hide" data-category="Customer POD"
+                                    onchange={handleFileSelect} multiple />
+                                <label for="customerInput"
+                                    class="slds-button slds-button_neutral responsive-upload-btn">
+                                    <lightning-icon icon-name="utility:upload" size="xx-small"
+                                        class="slds-m-right_x-small"></lightning-icon>
+                                    Choose Files
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Existing Files -->
+                        <div class="slds-pill_container_bare">
+                            <template for:each={customerPodFiles} for:item="file">
+                                <span key={file.id} class="slds-pill slds-m-around_xx-small custom-pill">
+                                    <span class="slds-pill__icon_container">
+                                        <lightning-icon icon-name="doctype:attachment" size="x-small"></lightning-icon>
+                                    </span>
+                                    <span class="slds-pill__label preview-link" data-id={file.id}
+                                        onclick={handlePreview}>{file.title}</span>
+                                    <button class="slds-button slds-button_icon slds-pill__remove" title="Delete"
+                                        data-id={file.id} onclick={handleExistingDelete}>
+                                        <lightning-icon icon-name="utility:close" size="xx-small"></lightning-icon>
+                                    </button>
+                                </span>
+                            </template>
+
+                            <!-- Newly Selected (Pending) Files -->
+                            <template for:each={pendingCustomerFiles} for:item="pfile" for:index="index">
+                                <span key={pfile.fileName}
+                                    class="slds-pill slds-theme_shade slds-m-around_xx-small custom-pill">
+                                    <span class="slds-pill__icon_container">
+                                        <lightning-icon icon-name="utility:new" size="x-small"></lightning-icon>
+                                    </span>
+                                    <span class="slds-pill__label">{pfile.fileName} <i>(Pending)</i></span>
+                                    <button class="slds-button slds-button_icon slds-pill__remove" title="Remove"
+                                        data-category="Customer POD" data-index={index}
+                                        onclick={handleRemovePendingFile}>
+                                        <lightning-icon icon-name="utility:close" size="xx-small"></lightning-icon>
+                                    </button>
+                                </span>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Section 3 Modal: Docket Copy -->
+                    <div class="slds-box slds-theme_default">
+                        <div class="slds-grid slds-grid_vertical-align-center slds-wrap slds-m-bottom_small">
+                            <h3
+                                class="slds-text-title_bold slds-col slds-size_1-of-1 slds-medium-size_8-of-12 slds-m-bottom_xx-small">
+                                Docket Copy (Optional)
+                            </h3>
+                            <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 upload-btn-col">
+                                <input type="file" id="docketInput" class="slds-hide" data-category="Docket Copy"
+                                    onchange={handleFileSelect} multiple />
+                                <label for="docketInput" class="slds-button slds-button_neutral responsive-upload-btn">
+                                    <lightning-icon icon-name="utility:upload" size="xx-small"
+                                        class="slds-m-right_x-small"></lightning-icon>
+                                    Choose Files
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Existing Files -->
+                        <div class="slds-pill_container_bare">
+                            <template for:each={docketCopyFiles} for:item="file">
+                                <span key={file.id} class="slds-pill slds-m-around_xx-small custom-pill">
+                                    <span class="slds-pill__icon_container">
+                                        <lightning-icon icon-name="doctype:attachment" size="x-small"></lightning-icon>
+                                    </span>
+                                    <span class="slds-pill__label preview-link" data-id={file.id}
+                                        onclick={handlePreview}>{file.title}</span>
+                                    <button class="slds-button slds-button_icon slds-pill__remove" title="Delete"
+                                        data-id={file.id} onclick={handleExistingDelete}>
+                                        <lightning-icon icon-name="utility:close" size="xx-small"></lightning-icon>
+                                    </button>
+                                </span>
+                            </template>
+
+                            <!-- Newly Selected (Pending) Files -->
+                            <template for:each={pendingDocketFiles} for:item="pfile" for:index="index">
+                                <span key={pfile.fileName}
+                                    class="slds-pill slds-theme_shade slds-m-around_xx-small custom-pill">
+                                    <span class="slds-pill__icon_container">
+                                        <lightning-icon icon-name="utility:new" size="x-small"></lightning-icon>
+                                    </span>
+                                    <span class="slds-pill__label">{pfile.fileName} <i>(Pending)</i></span>
+                                    <button class="slds-button slds-button_icon slds-pill__remove" title="Remove"
+                                        data-category="Docket Copy" data-index={index}
+                                        onclick={handleRemovePendingFile}>
+                                        <lightning-icon icon-name="utility:close" size="xx-small"></lightning-icon>
+                                    </button>
+                                </span>
+                            </template>
+                        </div>
+                    </div>
+
+                </div>
+
+                <footer class="slds-modal__footer mobile-footer">
+                    <lightning-button label="Cancel" onclick={closeModal} class="slds-m-right_small"></lightning-button>
+                    <lightning-button variant="brand" label="Save & Done"
+                        onclick={handleSaveAndValidate}></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

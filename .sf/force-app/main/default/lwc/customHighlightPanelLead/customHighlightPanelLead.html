@@ -1,0 +1,100 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 10-01-2026
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<template>
+    <div class="slds-page-header slds-page-header_record-home custom-header">
+        <div class="slds-page-header__row">
+            <!-- Left: Icon & Record Details -->
+            <div class="slds-page-header__col-title">
+                <div class="slds-media">
+                    <div class="slds-media__figure">
+                        <lightning-icon icon-name="standard:lead" alternative-text="Lead"></lightning-icon>
+                    </div>
+                    <div class="slds-media__body">
+                        <p class="slds-line-height_reset slds-text-title_caps">Lead</p>
+                        <h1 class="slds-page-header__title slds-truncate">{recordName}</h1>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Action Buttons -->
+            <div class="slds-page-header__col-actions">
+                <div class="slds-page-header__controls">
+                    <lightning-button-group>
+                        <!-- Dynamic Buttons: Hidden if Converted or Not Converted -->
+                        <template if:true={showCustomActions}>
+                            <lightning-button label="Generate Quote" onclick={handleGenerateQuote}></lightning-button>
+                            <lightning-button label="Generate Voucher"
+                                onclick={handleGenerateVoucher}></lightning-button>
+                            <lightning-button label="Convert Lead" onclick={handleConvertLead}></lightning-button>
+                            <lightning-button label="Assign Lead" onclick={handleAssignLead}></lightning-button>
+                        </template>
+
+                        <!-- Standard Buttons (Always Visible) -->
+                        <lightning-button label="Edit" onclick={handleEdit}></lightning-button>
+                        <lightning-button label="Delete" onclick={handleDelete}></lightning-button>
+                    </lightning-button-group>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Headless Action: Generate Quote -->
+    <c-generate-quote class="generate-quote-action" record-id={recordId}></c-generate-quote>
+
+    <!-- Modal: Generate Voucher (generateQuotation) -->
+    <template if:true={isVoucherOpen}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_medium" aria-modal="true">
+            <div class="slds-modal__container">
+                <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close"
+                    onclick={closeModal}>
+                    <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse"
+                        size="small"></lightning-icon>
+                </button>
+                <div class="slds-modal__content slds-p-around_none">
+                    <c-generate-quotation record-id={recordId} onclose={handleModalCloseEvent}></c-generate-quotation>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- Modal: Convert Lead (leadConversion) -->
+    <template if:true={isConvertOpen}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_medium" aria-modal="true">
+            <div class="slds-modal__container">
+                <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close"
+                    onclick={closeModal}>
+                    <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse"
+                        size="small"></lightning-icon>
+                </button>
+                <div class="slds-modal__content slds-p-around_none">
+                    <c-lead-conversion record-id={recordId} onclose={handleModalCloseEvent}></c-lead-conversion>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- Modal: Assign Lead (assignReocrdToUserCmp) -->
+    <template if:true={isAssignOpen}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_small" aria-modal="true">
+            <div class="slds-modal__container">
+                <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close"
+                    onclick={closeModal}>
+                    <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse"
+                        size="small"></lightning-icon>
+                </button>
+                <div class="slds-modal__content slds-p-around_none">
+                    <c-assign-reocrd-to-user-cmp record-id={recordId} object-api-name="Lead__c"
+                        onclose={handleModalCloseEvent}></c-assign-reocrd-to-user-cmp>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

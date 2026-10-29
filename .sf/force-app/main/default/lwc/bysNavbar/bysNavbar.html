@@ -1,0 +1,102 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 09-16-2026
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<template>
+    <nav class="navbar">
+        <div class="navbar-inner">
+
+            <!-- Brand -->
+            <div class="brand">
+                <img src={logoUrl} alt="Company logo" />
+                <div class="brand-text">
+                    <span class="name">Byahut</span>
+                    <span class="tag">Scientico</span>
+                </div>
+            </div>
+
+            <!-- Left nav items (profile-based visibility) -->
+            <div class="nav-scroll">
+                <div class="nav-items">
+                    <template for:each={visibleNavItems} for:item="item">
+                        <a key={item.id} class={item.cssClass} data-id={item.id} href="javascript:void(0);"
+                            onclick={handleNavClick}>{item.label}</a>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Right cluster -->
+            <div class="nav-right">
+
+                <!-- Notification bell -->
+                <div class={notifWrapClass}>
+                    <button class="icon-btn" title="Notifications" onclick={toggleNotif}>
+                        <lightning-icon icon-name="utility:notification" size="x-small" 
+                            class="bell-icon"></lightning-icon>
+                        <template if:true={hasNotifications}>
+                            <span class="badge">{notificationCount}</span>
+                        </template>
+                    </button>
+
+                    <div class="notif-panel">
+                        <div class="notif-title">
+                            <span>Notifications</span>
+                            <small onclick={handleMarkAllRead}>Mark all read</small>
+                        </div>
+                        <div class="notif-list" onscroll={handleNotificationScroll}>
+                            <template for:each={notifications} for:item="n">
+                                <div key={n.id} class={n.rowClass} data-id={n.targetId} data-notificationid={n.id}
+                                    onclick={handleNotificationClick} style="cursor:pointer;">
+                                    <div class="notif-dot"></div>
+                                    <div class="notif-body">
+                                        <div class="t">{n.title}</div>
+                                        <div class="d">{n.description}</div>
+                                        <div class="ts">{n.timestamp}</div>
+                                    </div>
+                                </div>
+                            </template>
+                            <template if:false={hasNotifications}>
+                                <div class="notif-empty">You're all caught up.</div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User menu -->
+                <div class={userWrapClass}>
+                    <button class="user-trigger" onclick={toggleUserMenu}>
+                        <div class="avatar">{userInitials}</div>
+                        <div class="user-meta">
+                            <span class="u-name">{userName}</span>
+                            <span class="u-role">{userProfileName}</span>
+                        </div>
+                        <lightning-icon icon-name="utility:chevrondown" size="xx-small" class="chev"></lightning-icon>
+                    </button>
+
+                    <div class="user-menu">
+                        <div class="user-menu-header">
+                            <div class="u-name">{userName}</div>
+                            <div class="u-email">{userEmail}</div>
+                        </div>
+                        <button class="menu-item" onclick={handleMyProfile}>
+                            <lightning-icon icon-name="utility:user" size="x-small"></lightning-icon>
+                            <span>My Profile</span>
+                        </button>
+                        <button class="menu-item" onclick={handleSettings}>
+                            <lightning-icon icon-name="utility:settings" size="x-small"></lightning-icon>
+                            <span>Settings</span>
+                        </button>
+                        <button class="menu-item danger" onclick={handleLogout}>
+                            <lightning-icon icon-name="utility:logout" size="x-small"></lightning-icon>
+                            <span>Log Out</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </nav>
+</template>

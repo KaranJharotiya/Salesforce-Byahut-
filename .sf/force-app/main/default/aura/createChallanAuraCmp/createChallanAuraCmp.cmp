@@ -1,0 +1,4 @@
+<aura:component implements="force:lightningQuickActionWithoutHeader,force:hasRecordId,force:hasSObjectName" access="global">
+    <aura:attribute name="recordId" type="String" />
+    <c:createChallanLwc recordId="{!v.recordId}" onclose="{!c.handleCloseModal}"/>
+</aura:component>

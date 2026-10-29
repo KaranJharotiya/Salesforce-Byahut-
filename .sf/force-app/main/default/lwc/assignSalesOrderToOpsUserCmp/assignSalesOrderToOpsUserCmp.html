@@ -1,0 +1,23 @@
+<template>
+    <lightning-quick-action-panel header="Assign Sales Order">
+        <lightning-layout multiple-rows>
+            <lightning-layout-item size="12" padding="around-small">
+                <lightning-record-picker object-api-name="User" label="Select Operations Team User" filter={activeFilter}
+                    display-info={displayInfo} value={selectedUserId} onchange={handleUserChange} required
+                    class="validate">
+                </lightning-record-picker>
+            </lightning-layout-item>
+        </lightning-layout>
+
+        <template lwc:if={isSaving}>
+            <lightning-spinner alternative-text="Assigning" size="small"></lightning-spinner>
+        </template>
+
+        <div slot="footer" class="slds-text-align_right">
+            <lightning-button-group>
+                <lightning-button label="Cancel" onclick={closeModal} variant="neutral"></lightning-button>
+                <lightning-button label="Assign" onclick={handleFooterSave} variant="brand" disabled={isSaving}></lightning-button>
+            </lightning-button-group>
+        </div>
+    </lightning-quick-action-panel>
+</template>

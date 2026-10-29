@@ -1,0 +1,15 @@
+<template>
+    <template if:true={showPanel}>
+        <div class="slds-is-relative slds-p-around_medium panel">
+            <template if:true={isLoading}>
+                <lightning-spinner alternative-text="Opening Sales Order" size="medium"></lightning-spinner>
+            </template>
+            <template if:true={errorMessage}>
+                <div class="slds-text-align_center">
+                    <p class="slds-text-color_error slds-m-bottom_small">{errorMessage}</p>
+                    <lightning-button label="Close" onclick={handleClose}></lightning-button>
+                </div>
+            </template>
+        </div>
+    </template>
+</template>

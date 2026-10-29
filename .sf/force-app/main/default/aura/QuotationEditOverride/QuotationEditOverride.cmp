@@ -1,0 +1,8 @@
+<aura:component implements="lightning:actionOverride,lightning:isUrlAddressable,force:hasRecordId,force:hasSObjectName" access="global">
+    <aura:attribute name="recordId" type="String" />
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
+
+    <div class="slds-card slds-p-around_medium" style="background-white; min-height: 100vh;">
+        <c:quotationLineItemsForQuoteEditCmp recordId="{!v.recordId}" onclose="{!c.handleClose}" />
+    </div>
+</aura:component>

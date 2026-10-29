@@ -1,0 +1,94 @@
+<template>
+
+	<div
+		style="background-color:#f3f3f3; width:100%; max-width:100%; box-sizing:border-box; padding:15px; overflow-x:hidden;">
+		<lightning-modal-header label="Convert Lead"></lightning-modal-header>
+
+		<div style="font-weight:bold; text-align:center; margin-top:15px; font-size:15px; color:#333;">
+			Your lead has been converted
+		</div>
+
+		<div style="display:flex; justify-content:center; align-items:center; margin:15px 0;">
+			<img src={LeadLogo} style="width:160px; max-width:100%; height:auto;" />
+		</div>
+
+		<!-- 3 Cards Layout -->
+		<div
+			style="display:flex; flex-direction:row; gap:12px; align-items:stretch; width:100%; box-sizing:border-box; margin-bottom:15px;">
+
+			<!-- ACCOUNT -->
+			<div style="flex:1; min-width:0; display:flex; flex-direction:column;">
+				<p style="font-size:13px; font-weight:700; margin-bottom:8px; color:#444; letter-spacing:0.5px;">ACCOUNT
+				</p>
+				<div
+					style="flex:1; background-color:#ffffff; border-radius:6px; box-shadow:0 4px 12px rgba(0,0,0,0.1); padding:10px; font-size:11px; line-height:1.4;">
+					<div style="display:flex; align-items:center; gap:6px; margin-bottom:8px;">
+						<lightning-icon icon-name="standard:account" size="x-small"></lightning-icon>
+						<span data-id="account" onclick={handleNavigate}
+							style="color:#0176d3; cursor:pointer; font-weight:600; word-break:break-all;">
+							{responsePayload.acc.Name}
+						</span>
+					</div>
+					<div style="word-break:break-word; color:#555;">
+						<p>Type: {responsePayload.acc.Type}</p>
+						<p>Phone: {responsePayload.acc.Phone}</p>
+						<p>Website: {responsePayload.acc.website}</p>
+						<p>Account Owner: {responsePayload.acc.Owner.Name}</p>
+						<p>Account Site: {responsePayload.acc.Site}</p>
+					</div>
+				</div>
+			</div>
+
+			<!-- CONTACT -->
+			<div style="flex:1; min-width:0; display:flex; flex-direction:column;">
+				<p style="font-size:13px; font-weight:700; margin-bottom:8px; color:#444; letter-spacing:0.5px;">CONTACT
+				</p>
+				<div
+					style="flex:1; background-color:#ffffff; border-radius:6px; box-shadow:0 4px 12px rgba(0,0,0,0.1); padding:10px; font-size:11px; line-height:1.4;">
+					<div style="display:flex; align-items:center; gap:6px; margin-bottom:8px;">
+						<lightning-icon icon-name="standard:contact" size="x-small"></lightning-icon>
+						<span data-id="contact" onclick={handleNavigate}
+							style="color:#0176d3; cursor:pointer; font-weight:600; word-break:break-all;">
+							{responsePayload.con.contactName}
+						</span>
+					</div>
+					<div style="word-break:break-word; color:#555;">
+						<p>Title: {responsePayload.con.Title}</p>
+						<p>Account Name: {responsePayload.con.Account.Name}</p>
+						<p>Phone: {responsePayload.con.Phone}</p>
+						<p>Email: {responsePayload.con.Email}</p>
+						<p>Mobile: {responsePayload.con.MobilePhone}</p>
+					</div>
+				</div>
+			</div>
+
+			<!-- OPPORTUNITY -->
+			<div style="flex:1; min-width:0; display:flex; flex-direction:column;">
+				<p style="font-size:13px; font-weight:700; margin-bottom:8px; color:#444; letter-spacing:0.5px;">
+					OPPORTUNITY</p>
+				<div
+					style="flex:1; background-color:#ffffff; border-radius:6px; box-shadow:0 4px 12px rgba(0,0,0,0.1); padding:10px; font-size:11px; line-height:1.4;">
+					<div style="display:flex; align-items:center; gap:6px; margin-bottom:8px;">
+						<lightning-icon icon-name="standard:opportunity" size="x-small"></lightning-icon>
+						<span data-id="opportunity" onclick={handleNavigate}
+							style="color:#0176d3; cursor:pointer; font-weight:600; word-break:break-all;">
+							{responsePayload.opp.Name}
+						</span>
+					</div>
+					<div style="word-break:break-word; color:#555;">
+						<p>Account Name: {responsePayload.opp.Account_Name__r.Name}</p>
+						<p>Close Date: {responsePayload.opp.Close_Date__c}</p>
+						<p>Amount: {responsePayload.opp.Amount__c}</p>
+						<p>Opportunity Owner: {responsePayload.opp.Owner.Name}</p>
+					</div>
+				</div>
+			</div>
+
+		</div>
+	</div>
+
+	<lightning-modal-footer>
+		<lightning-button label="Done" onclick={handleClose}></lightning-button>
+	</lightning-modal-footer>
+
+</template>

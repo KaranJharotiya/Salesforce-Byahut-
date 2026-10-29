@@ -1,0 +1,733 @@
+<!--
+  @description       : Responsive Challan Overview for Desktop, Tablet & Mobile
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 10-16-2026
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<template>
+    <lightning-card>
+        <!-- Title Slot: Pura Challan Overview bina truncate huye show hoga -->
+        <div slot="title" class="slds-media slds-media_center challan-title-block">
+            <div class="slds-media__figure">
+                <lightning-icon icon-name="standard:orders" size="small"></lightning-icon>
+            </div>
+            <div class="slds-media__body">
+                <h2 class="slds-card__header-link slds-text-heading_small slds-text-title_bold">
+                    Challan Overview
+                </h2>
+            </div>
+        </div>
+
+        <!-- Actions Slot: Status Badge, Progression Button, Existing PR Badge & Raise a PR -->
+        <div slot="actions" class="slds-grid slds-wrap slds-grid_vertical-align-center action-bar-container">
+
+            <!-- Status Badge -->
+            <template if:true={currentStatus}>
+                <span class="slds-badge slds-theme_success slds-m-right_small slds-m-bottom_xx-small">
+                    {currentStatus}
+                </span>
+            </template>
+
+            <!-- Dynamic Progression Button -->
+            <template if:true={createdPickerPackerDetail}>
+                <template if:true={isStationUserOrAdminOrWereHouse}>
+                    <template if:true={isWarehouseUserButtonDisable}>
+                        <template if:true={showStatusActionButton}>
+                            <lightning-button variant="brand" label={nextStatusLabel} onclick={handleStatusProgression}
+                                class="slds-m-right_small slds-m-bottom_xx-small">
+                            </lightning-button>
+                        </template>
+                    </template>
+                </template>
+            </template>
+
+            <!-- Invoice Upload -->
+            <template if:false={statusNotIsPackkingCompleted}>
+                <template if:true={IsPackingCompletedAndAccountsAndSysAdmin}>
+                    <lightning-file-upload class="slds-m-right_small slds-m-bottom_xx-small" label="Upload Invoice"
+                        name="invoiceUpload" accept={acceptedFormats} record-id={recordId}
+                        onuploadfinished={handleUploadFinished} multiple>
+                    </lightning-file-upload>
+                </template>
+            </template>
+
+            <template if:true={hasDelivery}>
+                <template for:each={deliveryLinks} for:item="delivery">
+                    <span key={delivery.recordId} class="slds-badge slds-theme_inverse slds-m-right_small slds-m-bottom_xx-small">
+                        <a href="#" data-id={delivery.recordId} onclick={handleClickDelivery}>{delivery.name}</a>
+                    </span>
+                </template>
+            </template>
+
+            <!-- Existing PR Badge (Moved to end) -->
+            <template if:true={hasExistingPR}>
+                <span class="slds-badge slds-theme_inverse slds-m-right_small slds-m-bottom_xx-small">
+                    <a href="#" onclick={handleClickPrRaised}>Raised ({challanData.existingPRNumber})</a>
+                </span>
+            </template>
+
+            <!-- Raise a PR Button (At the end) -->
+            <template if:true={canRaisePR}>
+                <lightning-button variant="brand-outline" label="Raise a PR" icon-name="utility:new"
+                    class="slds-m-bottom_xx-small" onclick={handleOpenPRModal}>
+                </lightning-button>
+            </template>
+
+        </div>
+        <!-- Loading Spinner -->
+        <template if:true={isLoading}>
+            <lightning-spinner alternative-text="Loading Details" size="medium"></lightning-spinner>
+        </template>
+
+        <div class="slds-p-horizontal_medium slds-p-bottom_medium slds-text-body_regular">
+
+            <!-- Error Handler -->
+            <template if:true={error}>
+                <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-theme_error slds-m-bottom_medium"
+                    role="alert">
+                    <h2 class="slds-text-body_regular slds-text-title_bold">{error}</h2>
+                </div>
+            </template>
+
+            <template if:true={challanData}>
+                <!-- SECTION 1: Challan Details Card -->
+                <article class="slds-card slds-card_boundary slds-m-bottom_medium">
+                    <div class="slds-card__body slds-card__body_inner slds-p-around_medium slds-m-around_none">
+                        <lightning-layout multiple-rows="true" vertical-align="center">
+                            <lightning-layout-item size="12" small-device-size="6" medium-device-size="4"
+                                padding="around-small">
+                                <div class="slds-media slds-media_center">
+                                    <div class="slds-media__figure">
+                                        <lightning-icon icon-name="utility:record" size="x-small"></lightning-icon>
+                                    </div>
+                                    <div class="slds-media__body">
+                                        <p class="slds-text-body_small slds-text-color_weak">Challan Number</p>
+                                        <p class="slds-text-heading_small">{challanData.challan.Name}</p>
+                                    </div>
+                                </div>
+                            </lightning-layout-item>
+
+                            <lightning-layout-item size="12" small-device-size="6" medium-device-size="4"
+                                padding="around-small">
+                                <div class="slds-media slds-media_center">
+                                    <div class="slds-media__figure">
+                                        <lightning-icon icon-name="utility:opportunity" size="x-small"></lightning-icon>
+                                    </div>
+                                    <div class="slds-media__body">
+                                        <p class="slds-text-body_small slds-text-color_weak">Opportunity</p>
+                                        <p class="slds-text-heading_small">
+                                            <a href="javascript:void(0);" data-id={challanData.challan.Opportunity__c}
+                                                data-object="Opportunity" onclick={handleNavigateToRecordNewTab}>
+                                                {challanData.challan.Opportunity__r.Name}
+                                            </a>
+                                        </p>
+                                    </div>
+                                </div>
+                            </lightning-layout-item>
+
+                            <lightning-layout-item size="12" small-device-size="6" medium-device-size="4"
+                                padding="around-small">
+                                <div class="slds-media slds-media_center">
+                                    <div class="slds-media__figure">
+                                        <lightning-icon icon-name="utility:package" size="x-small"></lightning-icon>
+                                    </div>
+                                    <div class="slds-media__body">
+                                        <p class="slds-text-body_small slds-text-color_weak">Way of Transit</p>
+                                        <span
+                                            class="slds-badge slds-theme_info">{challanData.challan.Way_of_Transit__c}</span>
+                                    </div>
+                                </div>
+                            </lightning-layout-item>
+
+                            <lightning-layout-item size="12" small-device-size="6" medium-device-size="4"
+                                padding="around-small">
+                                <div class="slds-media slds-media_center">
+                                    <div class="slds-media__figure">
+                                        <lightning-icon icon-name="utility:location" size="x-small"></lightning-icon>
+                                    </div>
+                                    <div class="slds-media__body">
+                                        <p class="slds-text-body_small slds-text-color_weak">Address</p>
+                                        <p class="slds-text-heading_small">{challanData.challan.Address__c}</p>
+                                    </div>
+                                </div>
+                            </lightning-layout-item>
+
+                            <lightning-layout-item size="12" small-device-size="6" medium-device-size="4"
+                                padding="around-small">
+                                <div class="slds-media slds-media_center">
+                                    <div class="slds-media__figure">
+                                        <lightning-icon icon-name="utility:moneybag" size="x-small"></lightning-icon>
+                                    </div>
+                                    <div class="slds-media__body">
+                                        <p class="slds-text-body_small slds-text-color_weak">Total Ordered Amount</p>
+                                        <p class="slds-text-heading_small">
+                                            <lightning-formatted-number
+                                                value={challanData.challan.Total_Ordered_Amount__c}
+                                                format-style="decimal" minimum-fraction-digits="2">
+                                            </lightning-formatted-number>
+                                        </p>
+                                    </div>
+                                </div>
+                            </lightning-layout-item>
+
+                            <lightning-layout-item size="12" small-device-size="6" medium-device-size="4"
+                                padding="around-small">
+                                <div class="slds-media slds-media_center">
+                                    <div class="slds-media__figure">
+                                        <lightning-icon icon-name="utility:money" size="x-small"></lightning-icon>
+                                    </div>
+                                    <div class="slds-media__body">
+                                        <p class="slds-text-body_small slds-text-color_weak">Total Actual Amount</p>
+                                        <p class="slds-text-heading_small">
+                                            <lightning-formatted-number
+                                                value={challanData.challan.Total_Actual_Amount__c}
+                                                format-style="decimal" minimum-fraction-digits="2">
+                                            </lightning-formatted-number>
+                                        </p>
+                                    </div>
+                                </div>
+                            </lightning-layout-item>
+
+                            <lightning-layout-item size="12" small-device-size="6" medium-device-size="4"
+                                padding="around-small">
+                                <div class="slds-media slds-media_center">
+                                    <div class="slds-media__figure">
+                                        <lightning-icon icon-name="utility:discounts" size="x-small"></lightning-icon>
+                                    </div>
+                                    <div class="slds-media__body">
+                                        <p class="slds-text-body_small slds-text-color_weak">Total Discounts</p>
+                                        <p class="slds-text-heading_small">{challanData.challan.Total_Discount__c}%</p>
+                                    </div>
+                                </div>
+                            </lightning-layout-item>
+
+                            <lightning-layout-item size="12" small-device-size="6" medium-device-size="4"
+                                padding="around-small">
+                                <div class="slds-media slds-media_center">
+                                    <div class="slds-media__figure">
+                                        <lightning-icon icon-name="utility:discounts" size="x-small"></lightning-icon>
+                                    </div>
+                                    <div class="slds-media__body">
+                                        <p class="slds-text-body_small slds-text-color_weak">Total GST</p>
+                                        <p class="slds-text-heading_small">{challanData.challan.Total_GST__c}%</p>
+                                    </div>
+                                </div>
+                            </lightning-layout-item>
+                        </lightning-layout>
+                    </div>
+                </article>
+
+                <!-- SECTION: Picker & Packer Card -->
+                <article class="slds-card slds-card_boundary slds-m-bottom_large">
+                    <div class="slds-card__header slds-p-around_small slds-border_bottom slds-m-around_none">
+                        <h3 class="slds-text-heading_small slds-text-title_bold">
+                            <lightning-icon icon-name="utility:groups" size="x-small" class="slds-m-right_x-small">
+                            </lightning-icon>
+                            Picker, Packer &amp; Station
+                        </h3>
+                    </div>
+                    <div class="slds-card__body slds-card__body_inner slds-p-around_medium slds-m-around_none">
+
+                        <!-- EDIT / CREATE MODE -->
+                        <template if:true={isWarehouseUser}>
+                            <template if:true={isEditingPickerDetail}>
+                                <lightning-layout multiple-rows="true" vertical-align="end">
+                                    <!-- Picker Master (Required) -->
+                                    <lightning-layout-item size="12" small-device-size="6" medium-device-size="3"
+                                        large-device-size="2" padding="around-small">
+                                        <lightning-record-picker label="Picker" placeholder="Search Picker..."
+                                            object-api-name="Picker_Packer_Master__c" value={selectedPickerId}
+                                            filter={pickerFilter} required onchange={handlePickerChange}>
+                                        </lightning-record-picker>
+                                    </lightning-layout-item>
+
+                                    <!-- Packer Master (Required) -->
+                                    <lightning-layout-item size="12" small-device-size="6" medium-device-size="3"
+                                        large-device-size="2" padding="around-small">
+                                        <lightning-record-picker label="Packer" placeholder="Search Packer..."
+                                            object-api-name="Picker_Packer_Master__c" value={selectedPackerId}
+                                            filter={packerFilter} required onchange={handlePackerChange}>
+                                        </lightning-record-picker>
+                                    </lightning-layout-item>
+
+                                    <!-- Station Master (Required) -->
+                                    <lightning-layout-item size="12" small-device-size="6" medium-device-size="3"
+                                        large-device-size="2" padding="around-small">
+                                        <lightning-record-picker label="Station User" placeholder="Search Users..."
+                                            object-api-name="User" value={selectedStationUserId}
+                                            filter={stationUserFilter} required onchange={handleStationUserChange}>
+                                        </lightning-record-picker>
+                                    </lightning-layout-item>
+
+                                    <!-- Instructions Textarea -->
+                                    <lightning-layout-item size="12" small-device-size="6" medium-device-size="3"
+                                        large-device-size="3" padding="around-small">
+                                        <lightning-textarea label="Instructions" placeholder="Enter instructions..."
+                                            value={instructions} onchange={handleInstructionsChange}>
+                                        </lightning-textarea>
+                                    </lightning-layout-item>
+
+                                    <!-- Save / Update Button -->
+                                    <lightning-layout-item size="12" small-device-size="12" medium-device-size="12"
+                                        large-device-size="3" padding="around-small"
+                                        class="slds-text-align_left slds-large-text-align_right slds-m-top_x-small">
+                                        <lightning-button variant="brand" label={saveButtonLabel}
+                                            onclick={handleSavePickerDetail}
+                                            class="slds-size_full slds-medium-size_auto">
+                                        </lightning-button>
+                                    </lightning-layout-item>
+                                </lightning-layout>
+                            </template>
+                        </template>
+
+                        <!-- READ ONLY / SAVED VIEW MODE -->
+                        <template if:false={isEditingPickerDetail}>
+                            <lightning-layout multiple-rows="true" vertical-align="center">
+                                <lightning-layout-item size="12" small-device-size="6" medium-device-size="3"
+                                    large-device-size="2" padding="around-small">
+                                    <div class="slds-media slds-media_center">
+                                        <div class="slds-media__figure">
+                                            <lightning-icon icon-name="utility:user" size="x-small"></lightning-icon>
+                                        </div>
+                                        <div class="slds-media__body">
+                                            <p class="slds-text-body_small slds-text-color_weak">Picker</p>
+                                            <p class="slds-text-heading_small slds-truncate" title={pickerName}>
+                                                {pickerName}</p>
+                                        </div>
+                                    </div>
+                                </lightning-layout-item>
+
+                                <lightning-layout-item size="12" small-device-size="6" medium-device-size="3"
+                                    large-device-size="2" padding="around-small">
+                                    <div class="slds-media slds-media_center">
+                                        <div class="slds-media__figure">
+                                            <lightning-icon icon-name="utility:user" size="x-small"></lightning-icon>
+                                        </div>
+                                        <div class="slds-media__body">
+                                            <p class="slds-text-body_small slds-text-color_weak">Packer</p>
+                                            <p class="slds-text-heading_small slds-truncate" title={packerName}>
+                                                {packerName}</p>
+                                        </div>
+                                    </div>
+                                </lightning-layout-item>
+
+                                <lightning-layout-item size="12" small-device-size="6" medium-device-size="3"
+                                    large-device-size="2" padding="around-small">
+                                    <div class="slds-media slds-media_center">
+                                        <div class="slds-media__figure">
+                                            <lightning-icon icon-name="utility:groups" size="x-small"></lightning-icon>
+                                        </div>
+                                        <div class="slds-media__body">
+                                            <p class="slds-text-body_small slds-text-color_weak">Station</p>
+                                            <p class="slds-text-heading_small slds-truncate" title={stationUserName}>
+                                                {stationUserName}</p>
+                                        </div>
+                                    </div>
+                                </lightning-layout-item>
+
+                                <lightning-layout-item size="12" small-device-size="6" medium-device-size="3"
+                                    large-device-size="3" padding="around-small">
+                                    <div class="slds-media slds-media_center">
+                                        <div class="slds-media__figure">
+                                            <lightning-icon icon-name="utility:note" size="x-small"></lightning-icon>
+                                        </div>
+                                        <div class="slds-media__body">
+                                            <p class="slds-text-body_small slds-text-color_weak">Instructions</p>
+                                            <p class="slds-text-heading_small slds-truncate"
+                                                title={instructionsDisplay}>{instructionsDisplay}</p>
+                                        </div>
+                                    </div>
+                                </lightning-layout-item>
+
+                                <template if:false={statusIsPackkingCompleted}>
+                                    <template if:true={isWarehouseUser}>
+                                        <template if:true={canEditPickerDetail}>
+                                            <lightning-layout-item size="12" small-device-size="12"
+                                                medium-device-size="12" large-device-size="3" padding="around-small"
+                                                class="slds-text-align_left slds-large-text-align_right slds-m-top_x-small">
+                                                <lightning-button variant="brand-outline" label="Edit Detail"
+                                                    icon-name="utility:edit" onclick={handleEnableEditPickerDetail}>
+                                                </lightning-button>
+                                            </lightning-layout-item>
+                                        </template>
+                                    </template>
+                                </template>
+                            </lightning-layout>
+                        </template>
+
+                    </div>
+                </article>
+
+                <!-- SECTION 2: Sales Orders & Line Items Accordion / Nested Tables -->
+                <div class="slds-m-top_medium">
+                    <div
+                        class="slds-grid slds-wrap slds-grid_align-spread slds-grid_vertical-align-center slds-m-bottom_small">
+                        <h3 class="slds-text-heading_small slds-text-title_bold slds-m-bottom_xx-small">
+                            <lightning-icon icon-name="utility:list" size="x-small" class="slds-m-right_x-small">
+                            </lightning-icon>
+                            Associated Sales Orders &amp; Line Items
+                        </h3>
+                        <span class="slds-badge slds-badge_lightest slds-m-bottom_xx-small">{totalSalesOrders} Sales
+                            Order(s)</span>
+                    </div>
+
+                    <template if:true={hasSalesOrders}>
+                        <template for:each={challanData.salesOrders} for:item="soWrap">
+                            <div key={soWrap.salesOrder.Id}
+                                class="slds-box slds-box_small slds-m-bottom_medium so-container-box">
+
+                                <!-- Sales Order Header -->
+                                <div class="so-header">
+
+                                    <!-- Left: Sales Order -->
+                                    <div class="so-header-left">
+                                        <span class="so-header-text">
+                                            <b>Sales Order: </b>
+                                            <a href="javascript:void(0);" data-id={soWrap.salesOrder.Id}
+                                                data-object="Sales_Order__c" onclick={handleNavigateToRecordNewTab}
+                                                class="slds-m-left_xx-small">
+                                                {soWrap.salesOrder.Name}
+                                            </a>
+                                        </span>
+                                    </div>
+
+                                    <!-- Right: Amounts + Items -->
+                                    <div class="so-header-right">
+
+                                        <span class="amount-header-text">
+                                            <b>Ordered Amount: </b>
+                                            {soWrap.salesOrderChallan.Ordered_Amount__c}
+                                        </span>
+
+                                        <span class="amount-header-text">
+                                            <b>Actual Amount: </b>
+                                            {soWrap.salesOrderChallan.Actual_Amount__c}
+                                        </span>
+
+                                        <span class="slds-badge slds-theme_success">
+                                            {soWrap.totalLineItems} Item(s)
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                                <template if:true={soWrap.salesOrder.Special_Instructions__c}>
+                                    <div class="slds-p-around_small slds-m-top_x-small slds-theme_shade">
+                                        <span
+                                            class="slds-text-heading_small slds-text-title_bold slds-m-right_xx-small">Special
+                                            Instructions:</span>
+                                        <span
+                                            class="slds-text-heading_small">{soWrap.salesOrder.Special_Instructions__c}</span>
+                                    </div>
+                                </template>
+
+                                <!-- Line Items Table for this Sales Order -->
+                                <div class="slds-m-top_small slds-scrollable_x">
+                                    <template if:true={soWrap.totalLineItems}>
+                                        <table
+                                            class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped">
+                                            <thead>
+                                                <tr class="slds-line-height_reset slds-theme_shade">
+                                                    <!-- Checkbox column header: Visible ONLY to Station/Admin AND until Packing is completed -->
+                                                    <template if:true={showLineItemCheckboxes}>
+                                                        <th style="min-width: 5rem;" class="slds-text-align_center">
+                                                            <div
+                                                                class="slds-grid slds-grid_vertical-align-center slds-grid_align-center">
+                                                                <!-- <lightning-input type="checkbox"
+                                                                    data-soid={soWrap.salesOrder.Id}
+                                                                    onchange={handleSelectAllLineItems}
+                                                                    checked={soWrap.isAllSelected}>
+                                                                </lightning-input> -->
+                                                                <template if:true={lineItemCheckboxHeader}>
+                                                                    <span
+                                                                        class="slds-truncate slds-text-title_bold slds-m-left_xx-small"
+                                                                        title={lineItemCheckboxHeader}>
+                                                                        {lineItemCheckboxHeader}
+                                                                    </span>
+                                                                </template>
+                                                            </div>
+                                                        </th>
+                                                    </template>
+                                                    <th scope="col">
+                                                        <div class="slds-truncate slds-text-title_bold"
+                                                            title="Line Item #">Line Item #</div>
+                                                    </th>
+                                                    <th scope="col">
+                                                        <div class="slds-truncate slds-text-title_bold" title="Product">
+                                                            Product</div>
+                                                    </th>
+                                                    <th scope="col">
+                                                        <div class="slds-truncate slds-text-title_bold"
+                                                            title="Priority">Priority</div>
+                                                    </th>
+                                                    <th scope="col">
+                                                        <div class="slds-truncate slds-text-title_bold"
+                                                            title="Quantity">Quantity</div>
+                                                    </th>
+                                                    <th scope="col">
+                                                        <div class="slds-truncate slds-text-title_bold" title="Amount">
+                                                            Amount</div>
+                                                    </th>
+                                                    <th scope="col">
+                                                        <div class="slds-truncate slds-text-title_bold"
+                                                            title="Discount (%)">
+                                                            Discount (%)</div>
+                                                    </th>
+                                                    <th scope="col">
+                                                        <div class="slds-truncate slds-text-title_bold"
+                                                            title="After Discount">
+                                                            After Discount</div>
+                                                    </th>
+                                                    <th scope="col">
+                                                        <div class="slds-truncate slds-text-title_bold" title="GST (%)">
+                                                            GST (%)</div>
+                                                    </th>
+                                                    <th scope="col">
+                                                        <div class="slds-truncate slds-text-title_bold"
+                                                            title="GST Amount">
+                                                            GST Amount</div>
+                                                    </th>
+                                                    <th scope="col">
+                                                        <div class="slds-truncate slds-text-title_bold"
+                                                            title="Ordered Amount">Ordered Amount</div>
+                                                    </th>
+                                                    <th scope="col">
+                                                        <div class="slds-truncate slds-text-title_bold"
+                                                            title="Promise Date">Promise Date</div>
+                                                    </th>
+                                                    <th scope="col" style="min-width: 140px;">
+                                                        <div class="slds-truncate slds-text-title_bold"
+                                                            title="Dispatched Qty">Dispatched Qty</div>
+                                                    </th>
+                                                    <th scope="col">
+                                                        <div class="slds-truncate slds-text-title_bold"
+                                                            title="Actual Amount">Actual Amount</div>
+                                                    </th>
+                                                    <th scope="col">
+                                                        <div class="slds-truncate slds-text-title_bold"
+                                                            title="Pending Qty">Pending Qty</div>
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <template for:each={soWrap.lineItems} for:item="item">
+                                                    <tr key={item.Id} class="slds-hint-parent">
+                                                        <!-- Checkbox cell: Visible ONLY to Station/Admin AND until Packing is completed -->
+                                                        <template if:true={showLineItemCheckboxes}>
+                                                            <td class="slds-text-align_center">
+                                                                <lightning-input type="checkbox" data-id={item.Id}
+                                                                    data-soid={soWrap.salesOrder.Id}
+                                                                    checked={item.isChecked}
+                                                                    onchange={handleLineItemCheck}>
+                                                                </lightning-input>
+                                                            </td>
+                                                        </template>
+                                                        <td>
+                                                            <div class="slds-truncate slds-text-body_regular">
+                                                                <a href="javascript:void(0);" data-id={item.Id}
+                                                                    data-object="Cart_Line_Item__c"
+                                                                    onclick={handleNavigateToRecordNewTab}>
+                                                                    {item.Name}
+                                                                </a>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="slds-truncate slds-text-body_regular">
+                                                                <a href="javascript:void(0);" data-id={item.Product__c}
+                                                                    data-object="Product2"
+                                                                    onclick={handleNavigateToRecordNewTab}>
+                                                                    {item.Product__r.Name}
+                                                                </a>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="slds-truncate slds-text-body_regular">
+                                                                {item.Priority__c}
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="slds-truncate slds-text-body_regular">
+                                                                {item.Quantity__c}
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="slds-truncate slds-text-body_regular">
+                                                                {item.Amount__c}
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="slds-truncate slds-text-body_regular">
+                                                                {item.Discount__c}
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="slds-truncate slds-text-body_regular">
+                                                                {item.After_Discount__c}
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="slds-truncate slds-text-body_regular">
+                                                                {item.GST__c}%
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="slds-truncate slds-text-body_regular">
+                                                                {item.GST_Amount__c}
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="slds-truncate slds-text-body_regular">
+                                                                {item.Total_Amount__c}
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="slds-truncate slds-text-body_regular">
+                                                                <template if:true={item.Promise_Date__c}>
+                                                                    <lightning-formatted-date-time
+                                                                        value={item.Promise_Date__c} year="numeric"
+                                                                        month="2-digit" day="2-digit" time-zone="UTC">
+                                                                    </lightning-formatted-date-time>
+                                                                </template>
+                                                                <template if:false={item.Promise_Date__c}>
+                                                                    -
+                                                                </template>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <template if:false={statusIsPackkingCompleted}>
+                                                                <template if:true={isWarehouseUser}>
+                                                                    <lightning-input type="number"
+                                                                        variant="label-hidden" data-id={item.Id}
+                                                                        value={item.Total_Dispatch_Quantity__c} min="0"
+                                                                        max={item.Quantity__c}
+                                                                        onchange={handleDispatchedQtyChange}>
+                                                                    </lightning-input>
+                                                                </template>
+                                                            </template>
+                                                            <template if:true={statusIsPackkingCompleted}>
+                                                                <div class="slds-truncate slds-text-body_regular">
+                                                                    {item.Total_Dispatch_Quantity__c}
+                                                                </div>
+                                                            </template>
+                                                        </td>
+                                                        <td>
+                                                            <div class="slds-truncate slds-text-body_regular">
+                                                                {item.Actual_Amount__c}
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="slds-truncate slds-text-body_regular">
+                                                                {item.Total_Pending_Quantity__c}
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </template>
+                                            </tbody>
+                                        </table>
+                                    </template>
+                                    <template if:false={soWrap.totalLineItems}>
+                                        <p class="slds-p-around_small slds-text-color_weak slds-text-body_small">
+                                            No Line Items linked to this Sales Order.
+                                        </p>
+                                    </template>
+                                </div>
+
+                            </div>
+                        </template>
+                    </template>
+
+                    <template if:false={hasSalesOrders}>
+                        <div class="slds-box slds-text-align_center slds-m-top_small" style="background: #fafaf9;">
+                            <p class="slds-text-color_weak slds-text-body_regular">No Sales Orders are associated with
+                                this Challan.</p>
+                        </div>
+                    </template>
+
+                    <!-- Warehouse Team Actions -->
+                    <template if:true={showSaveQuantitiesButton}>
+                        <div class="slds-align_absolute-center slds-m-top_large slds-m-bottom_small">
+                            <lightning-button variant="brand" label="Save Dispatched Quantities"
+                                onclick={handleSaveQuantities}></lightning-button>
+                        </div>
+                    </template>
+
+                </div>
+            </template>
+        </div>
+    </lightning-card>
+
+    <!-- RAISE A PR MODAL -->
+    <template if:true={isPRModalOpen}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_medium" aria-modal="true">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                        title="Close" onclick={handleClosePRModal}>
+                        <lightning-icon icon-name="utility:close" alternative-text="Close"
+                            size="small"></lightning-icon>
+                    </button>
+                    <h2 class="slds-text-heading_medium slds-hyphenate">Raise Purchase Request</h2>
+                </header>
+
+                <div class="slds-modal__content slds-p-around_medium slds-scrollable_x">
+                    <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+                        <thead>
+                            <tr class="slds-line-height_reset">
+                                <th style="width: 3.25rem;" class="slds-text-align_right">
+                                    <lightning-input type="checkbox" onchange={handleSelectAllPRItems}
+                                        checked={isAllPRSelected}></lightning-input>
+                                </th>
+                                <th scope="col">
+                                    <div class="slds-truncate" title="Line Item #">Line Item #</div>
+                                </th>
+                                <th scope="col">
+                                    <div class="slds-truncate" title="Product">Product</div>
+                                </th>
+                                <th scope="col">
+                                    <div class="slds-truncate" title="Pending Qty">Pending Qty</div>
+                                </th>
+                                <th scope="col" style="width: 140px;">
+                                    <div class="slds-truncate" title="Requested Qty">Requested Qty</div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={modalPRLineItems} for:item="item">
+                                <tr key={item.Id}>
+                                    <td class="slds-text-align_right">
+                                        <lightning-input type="checkbox" data-id={item.Id} checked={item.selected}
+                                            onchange={handlePRCheckboxChange}></lightning-input>
+                                    </td>
+                                    <td>
+                                        <div class="slds-truncate">{item.Name}</div>
+                                    </td>
+                                    <td>
+                                        <div class="slds-truncate">{item.productName}</div>
+                                    </td>
+                                    <td>
+                                        <div class="slds-truncate">{item.pendingQty}</div>
+                                    </td>
+                                    <td>
+                                        <lightning-input type="number" variant="label-hidden" data-id={item.Id}
+                                            value={item.requestedQty} min="1" disabled={item.isQtyDisabled}
+                                            onchange={handlePRQtyChange}>
+                                        </lightning-input>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+
+                <footer class="slds-modal__footer">
+                    <lightning-button variant="neutral" label="Cancel" onclick={handleClosePRModal}
+                        class="slds-m-right_small"></lightning-button>
+                    <lightning-button variant="brand" label="Submit PR" onclick={handleSubmitPR}></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

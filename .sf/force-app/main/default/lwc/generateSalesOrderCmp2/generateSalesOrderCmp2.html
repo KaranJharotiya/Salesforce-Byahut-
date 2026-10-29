@@ -1,0 +1,279 @@
+<!--
+  @description       : Generate Sales Order
+  @last modified on  : 10-06-2026
+-->
+<template>
+    <div>
+        <lightning-card title="Generate Sales Order" icon-name="standard:orders">
+            <lightning-spinner if:true={isLoading} alternative-text="Loading" size="medium"></lightning-spinner>
+
+            <!-- NO ACCESS SCREEN FOR RESTRICTED PROFILES -->
+            <template if:true={isAccessDenied}>
+                <div class="slds-p-around_large slds-text-align_center">
+                    <div class="slds-notify slds-notify_alert slds-alert_error slds-m-bottom_medium" role="alert">
+                        <span class="slds-assistive-text">Error</span>
+                        <h2>You do not have access to generate a Sales Order.</h2>
+                    </div>
+                    <lightning-button label={backLabel} onclick={handleCancel}
+                        variant="brand"></lightning-button>
+                </div>
+            </template>
+
+            <!-- MAIN SCREEN (IF ACCESS GRANTED) -->
+            <template if:false={isAccessDenied}>
+                <template if:true={challanBlocked}>
+                    <div class="slds-p-around_large slds-text-align_center">
+                        <div class="slds-notify slds-notify_alert slds-alert_error slds-m-bottom_medium" role="alert">
+                            <span class="slds-assistive-text">Error</span>
+                            <h2>{challanMessage}</h2>
+                        </div>
+                        <lightning-button label={backLabel} onclick={handleCancel} variant="brand"></lightning-button>
+                    </div>
+                </template>
+                <template if:false={challanBlocked}>
+                <div class="slds-p-horizontal_medium slds-p-vertical_small">
+
+                    <!-- HEADER INPUTS (Clean Structured Card Section) -->
+                    <div class="slds-box slds-box_x-small slds-theme_shade slds-m-bottom_medium">
+                        <div class="slds-grid slds-wrap slds-gutters_small">
+                            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                                <lightning-input type="date" label="Sales Order Date"
+                                    value={salesorderRec.Sales_Order_Date__c} data-field="Sales_Order_Date__c"
+                                    onchange={handleChange} required>
+                                </lightning-input>
+                            </div>
+
+                            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                                <lightning-input type="text" label="Customer Purchase Order No"
+                                    value={salesorderRec.Customer_Purchase_Order_No__c}
+                                    data-field="Customer_Purchase_Order_No__c" onchange={handleChange} max-length="255">
+                                </lightning-input>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CASE 1: JAB QUOTATIONS AVAILABLE HAIN -->
+                    <template if:true={showQuotations}>
+                        <lightning-accordion allow-multiple-sections-open>
+                            <template for:each={quotations} for:item="quote">
+                                <lightning-accordion-section key={quote.quotation.Id} name={quote.quotation.Name}
+                                    label={quote.quotation.Name}>
+
+                                    <!-- Scrollable container with sticky header support -->
+                                    <div class="slds-scrollable_x table-container slds-m-bottom_medium">
+                                        <table
+                                            class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
+                                            <thead>
+                                                <tr class="slds-line-height_reset">
+                                                    <th scope="col">
+                                                        <div class="slds-truncate">Select</div>
+                                                    </th>
+                                                    <th scope="col">
+                                                        <div class="slds-truncate">S No.</div>
+                                                    </th>
+                                                    <th scope="col">
+                                                        <div class="slds-truncate">Name</div>
+                                                    </th>
+                                                    <th scope="col">
+                                                        <div class="slds-truncate">Industry</div>
+                                                    </th>
+                                                    <th scope="col">
+                                                        <div class="slds-truncate">CAS Number</div>
+                                                    </th>
+                                                    <th scope="col">
+                                                        <div class="slds-truncate">Product Code</div>
+                                                    </th>
+                                                    <th scope="col">
+                                                        <div class="slds-truncate">Brand</div>
+                                                    </th>
+                                                    <th scope="col">
+                                                        <div class="slds-truncate">Sub Brand</div>
+                                                    </th>
+                                                    <th scope="col">
+                                                        <div class="slds-truncate">Category</div>
+                                                    </th>
+                                                    <th scope="col">
+                                                        <div class="slds-truncate">Sub Category</div>
+                                                    </th>
+                                                    <th scope="col">
+                                                        <div class="slds-truncate">Stock</div>
+                                                    </th>
+                                                    <th scope="col">
+                                                        <div class="slds-truncate">Hold Quantity</div>
+                                                    </th>
+                                                    <th scope="col">
+                                                        <div class="slds-truncate">Available Quantity</div>
+                                                    </th>
+                                                    <th scope="col" >
+                                                        <div class="slds-truncate" style="min-width: 105px;">Price</div>
+                                                    </th>
+                                                    <th scope="col" >
+                                                        <div class="slds-truncate" style="min-width: 90px;">Quantity</div>
+                                                    </th>
+                                                    <th scope="col">
+                                                        <div class="slds-truncate">Amount</div>
+                                                    </th>
+                                                    <th scope="col">
+                                                        <div class="slds-truncate" style="min-width: 85px;">Discount %</div>
+                                                    </th>
+                                                    <th scope="col">
+                                                        <div class="slds-truncate">Discount Amount</div>
+                                                    </th>
+                                                    <th scope="col">
+                                                        <div class="slds-truncate">After Discount</div>
+                                                    </th>
+                                                    <th scope="col">
+                                                        <div class="slds-truncate" style="min-width: 80px;">GST %</div>
+                                                    </th>
+                                                    <th scope="col">
+                                                        <div class="slds-truncate">GST Amount</div>
+                                                    </th>
+                                                    <th scope="col">
+                                                        <div class="slds-truncate">Total Amount Inc. GST</div>
+                                                    </th>
+                                                    <th scope="col">
+                                                        <div class="slds-truncate" style="min-width: 140px;">Promise Dispatch Date</div>
+                                                    </th>
+                                                    <th scope="col">
+                                                        <div class="slds-truncate" style="min-width: 140px;">Priority</div>
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <template for:each={quote.lineItems} for:item="row">
+                                                    <tr key={row.item.Id}>
+                                                        <td style="text-align: center;">
+                                                            <lightning-input type="checkbox" checked={row.isSelected}
+                                                                data-quoteid={quote.quotation.Id}
+                                                                data-itemid={row.item.Id}
+                                                                onchange={handleCheckboxChange}
+                                                                disabled={row.isDisabled} variant="label-hidden">
+                                                            </lightning-input>
+                                                        </td>
+                                                        <td>{row.index}</td>
+                                                        <td class="slds-truncate" style="font-weight: 500;">
+                                                            {row.productName}
+                                                        </td>
+                                                        <td>{row.industry}</td>
+                                                        <td>{row.casNumber}</td>
+                                                        <td>{row.productCode}</td>
+                                                        <td>{row.brandName}</td>
+                                                        <td>{row.subBrandName}</td>
+                                                        <td>{row.categoryName}</td>
+                                                        <td>{row.subCategoryName}</td>
+                                                        <td style="text-align: right;">{row.stock}</td>
+                                                        <td style="text-align: right;">{row.holdQuantity}</td>
+                                                        <td style="text-align: right;">{row.availableQuantity}</td>
+
+                                                        <!-- Price Column (Inline Editable with Pencil Icon) -->
+                                                        <td>
+                                                            <template if:false={row.isEditingPrice}>
+                                                                <span>₹ {row.price}</span>
+                                                                <template if:false={row.isFieldDisabled}>
+                                                                    <lightning-button-icon icon-name="utility:edit"
+                                                                        variant="bare" alternative-text="Edit Price"
+                                                                        class="slds-m-left_xx-small"
+                                                                        data-quoteid={quote.quotation.Id}
+                                                                        data-itemid={row.item.Id}
+                                                                        onclick={handleEditPrice}>
+                                                                    </lightning-button-icon>
+                                                                </template>
+                                                            </template>
+                                                            <template if:true={row.isEditingPrice}>
+                                                                <lightning-input type="number" step="0.01" name="price"
+                                                                    value={row.price} data-quoteid={quote.quotation.Id}
+                                                                    data-itemid={row.item.Id} data-field="price"
+                                                                    onchange={handleRowFieldChange}
+                                                                    onblur={handlePriceBlur} variant="label-hidden">
+                                                                </lightning-input>
+                                                            </template>
+                                                        </td>
+
+                                                        <td>
+                                                            <lightning-input type="number" variant="label-hidden"
+                                                                value={row.quantity} data-quoteid={quote.quotation.Id}
+                                                                data-itemid={row.item.Id} data-field="quantity"
+                                                                onchange={handleRowFieldChange}
+                                                                disabled={row.isFieldDisabled}>
+                                                            </lightning-input>
+                                                        </td>
+
+                                                        <td style="text-align: right;">₹ {row.amount}</td>
+
+                                                        <td>
+                                                            <lightning-input type="number" variant="label-hidden"
+                                                                value={row.discount} data-quoteid={quote.quotation.Id}
+                                                                data-itemid={row.item.Id} data-field="discount"
+                                                                onchange={handleRowFieldChange}
+                                                                disabled={row.isFieldDisabled}>
+                                                            </lightning-input>
+                                                        </td>
+
+                                                        <td style="text-align: right;">₹ {row.discountAmount}</td>
+                                                        <td style="text-align: right; font-weight: 500;">₹
+                                                            {row.afterDiscount}
+                                                        </td>
+
+                                                        <td>
+                                                            <lightning-input type="number" variant="label-hidden"
+                                                                value={row.gst} data-quoteid={quote.quotation.Id}
+                                                                data-itemid={row.item.Id} data-field="gst"
+                                                                onchange={handleRowFieldChange}
+                                                                disabled={row.isFieldDisabled}>
+                                                            </lightning-input>
+                                                        </td>
+
+                                                        <td style="text-align: right;">₹ {row.gstAmount}</td>
+                                                        <td style="text-align: right; font-weight: 600;">₹
+                                                            {row.totalAmount}
+                                                        </td>
+
+                                                        <td>
+                                                            <lightning-input type="date" variant="label-hidden"
+                                                                value={row.promiseDate}
+                                                                data-quoteid={quote.quotation.Id}
+                                                                data-itemid={row.item.Id} data-field="promiseDate"
+                                                                onchange={handleRowFieldChange}
+                                                                disabled={row.isFieldDisabled}>
+                                                            </lightning-input>
+                                                        </td>
+                                                        <td>
+                                                            <lightning-combobox value={row.priority}
+                                                                data-field="priority" options={priorityOptions}
+                                                                onchange={handleRowFieldChange}
+                                                                data-quoteid={quote.quotation.Id}
+                                                                data-itemid={row.item.Id} disabled={row.isFieldDisabled}
+                                                                variant="label-hidden"></lightning-combobox>
+                                                        </td>
+                                                    </tr>
+                                                </template>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                </lightning-accordion-section>
+                            </template>
+                        </lightning-accordion>
+                    </template>
+
+                    <!-- CASE 2: JAB QUOTATIONS NAHI HAIN (CHILD COMPONENT) -->
+                    <template if:true={showProductSelection}>
+                        <c-direct-product-selection-cmp class="childProductCmp" initial-products={initialProducts}></c-direct-product-selection-cmp>
+                    </template>
+
+                    <!-- ACTION BUTTONS -->
+                    <div class="sticky-footer slds-align_absolute-center slds-m-top_large slds-p-bottom_small">
+                        <lightning-button-group>
+                            <lightning-button label="Cancel" onclick={handleCancel}
+                                variant="neutral"></lightning-button>
+                            <lightning-button label="Save Sales Order" onclick={handleFooterSave} variant="brand"
+                                disabled={disableSave}></lightning-button>
+                        </lightning-button-group>
+                    </div>
+
+                </div>
+                </template>
+            </template>
+        </lightning-card>
+    </div>
+</template>

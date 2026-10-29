@@ -1,0 +1,99 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 10-19-2026
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<template>
+    <lightning-card title="Create Challan" icon-name="standard:orders">
+
+        <!-- STEP 1: Sales Order Selection Table -->
+        <template if:false={showChallan}>
+            <div class="slds-p-around_medium content-area">
+                <template if:true={isLoading}>
+                    <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+                </template>
+
+                <!-- Table container with fixed height for lightning-datatable sticky header -->
+                <div class="datatable-container slds-border_top slds-border_bottom slds-border_right slds-border_left">
+                    <lightning-datatable key-field="Id" data={rows} columns={columns}
+                        selected-rows={currentPageSelected} onrowselection={handleRowSelection} sorted-by={sortedBy}
+                        sorted-direction={sortedDirection} onsort={handleSort} show-row-number-column>
+                    </lightning-datatable>
+                </div>
+
+                <!-- Footer Summary & Centered Pagination (Mobile Responsive Grid) -->
+                <div class="slds-grid slds-wrap slds-grid_vertical-align-center slds-m-top_medium pagination-bar">
+                    <!-- Left: Count -->
+                    <div
+                        class="slds-col slds-size_1-of-1 slds-medium-size_3-of-12 slds-order_2 slds-medium-order_1 slds-text-title_bold slds-text-color_weak slds-m-vertical_xx-small">
+                        <lightning-badge label={selectedCountBadge}></lightning-badge>
+                        <span class="slds-m-left_x-small">Total Records: {totalRecords}</span>
+                    </div>
+
+                    <!-- Center: Pagination Controls -->
+                    <div
+                        class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-order_1 slds-medium-order_2 slds-align_absolute-center slds-m-vertical_xx-small">
+                        <lightning-button-icon icon-name="utility:left" alternative-text="First Page"
+                            onclick={handleFirst} disabled={isFirst}></lightning-button-icon>
+                        <lightning-button-icon icon-name="utility:chevronleft" alternative-text="Previous"
+                            onclick={handlePrev} disabled={isFirst}
+                            class="slds-m-left_xx-small"></lightning-button-icon>
+
+                        <span class="slds-m-horizontal_medium slds-text-body_regular">
+                            Page <strong>{pageNumber}</strong> of <strong>{totalPages}</strong>
+                        </span>
+
+                        <lightning-button-icon icon-name="utility:chevronright" alternative-text="Next"
+                            onclick={handleNext} disabled={isLast}></lightning-button-icon>
+                        <lightning-button-icon icon-name="utility:right" alternative-text="Last Page"
+                            onclick={handleLast} disabled={isLast} class="slds-m-left_xx-small"></lightning-button-icon>
+                    </div>
+
+                    <!-- Right: Page Size -->
+                    <div
+                        class="slds-col slds-size_1-of-1 slds-medium-size_3-of-12 slds-order_3 slds-medium-order_3 slds-grid slds-grid_align-end slds-grid_vertical-align-center slds-m-vertical_xx-small page-size-container">
+                        <span class="slds-text-body_small slds-m-right_x-small">Rows per page:</span>
+                        <lightning-combobox variant="label-hidden" value={pageSizeStr} options={pageSizeOptions}
+                            onchange={handlePageSizeChange} class="page-size">
+                        </lightning-combobox>
+                    </div>
+                </div>
+
+                <!-- Sticky Footer for Actions (STEP 1) -->
+                <div class="sticky-footer slds-m-top_large slds-p-vertical_small">
+                    <lightning-layout multiple-rows="true" vertical-align="center">
+                        <!-- Left Button: Mobile pe 12 (Full width), Desktop/Tablet pe 6 (Half width) -->
+                        <lightning-layout-item size="12" small-device-size="12" medium-device-size="6"
+                            large-device-size="6" class="footer-item-left">
+                            <lightning-button label="Back to Home" icon-name="utility:home" onclick={handleBackToHome}
+                                class="mobile-full-btn">
+                            </lightning-button>
+                        </lightning-layout-item>
+
+                        <!-- Right Button: Mobile pe 12 (Full width), Desktop/Tablet pe 6 (Half width) -->
+                        <lightning-layout-item size="12" small-device-size="12" medium-device-size="6"
+                            large-device-size="6" class="footer-item-right">
+                            <lightning-button label="Process Challan" icon-name="utility:forward"
+                                onclick={handleProcessChallan} class="mobile-full-btn">
+                            </lightning-button>
+                        </lightning-layout-item>
+                    </lightning-layout>
+                </div>
+            </div>
+        </template>
+
+        <!-- STEP 2: Challan Component Call -->
+        <template if:true={showChallan}>
+            <div class="slds-p-around_medium content-area">
+                <c-create-challan-lwc record-ids={selectedIds} onclose={handleBack}
+                    challan-from-home={challanFromHome}></c-create-challan-lwc>
+            </div>
+            <div class="sticky-footer slds-grid slds-grid_align-spread slds-p-around_small">
+                <lightning-button label="Back to SalesOrders" icon-name="utility:back" onclick={handleBack}>
+                </lightning-button>
+            </div>
+        </template>
+    </lightning-card>
+</template>

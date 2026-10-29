@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>67.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Status Queue Board</masterLabel>
+    <targets>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+        <target>lightning__AppPage</target>
+        <target>lightning__RecordPage</target>
+        <target>lightning__HomePage</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightningCommunity__Default,lightning__AppPage,lightning__RecordPage,lightning__HomePage">
+            <property name="columnTitle" type="String" default="Queue"
+                      label="Column Title"
+                      description="Heading shown at the top of this column, e.g. Ready for Picker" />
+            <property name="objectApiName" type="String" default="Challan__c"
+                      label="Object API Name"
+                      description="API name of the object this board queries, e.g. Challan__c" />
+            <property name="statusValue" type="String"
+                      label="Status Value"
+                      description="The status this column shows, e.g. Ready for Picker" />
+            <property name="emptyMessage" type="String" default="No records in this stage."
+                      label="Empty State Message" />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

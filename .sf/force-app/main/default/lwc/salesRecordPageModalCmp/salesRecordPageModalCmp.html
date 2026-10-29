@@ -1,0 +1,116 @@
+<!-- deliveryScheduleModal.html -->
+<template>
+    <template if:true={isModalOpen}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open custom-modal">
+            <div class="slds-modal__container">
+
+                <!-- Header -->
+                <header class="slds-modal__header modal-header">
+                    <div class="header-content">
+                        <lightning-icon icon-name="standard:shipment" size="medium" alternative-text="Delivery">
+                        </lightning-icon>
+
+                        <div class="title-section">
+                            <h2 class="slds-text-heading_medium">
+                                Dispatch Planning Overview
+                            </h2>
+
+                            <p class="delivery-type">
+                                Dispatch Mode :
+                                <span class={deliveryClass}>
+                                    {deliveryTypeLabel}
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <button class="slds-button slds-button_icon slds-modal__close" onclick={closeModal}>
+                        <lightning-icon icon-name="utility:close" alternative-text="close" size="small">
+                        </lightning-icon>
+                    </button>
+                </header>
+
+                <!-- Body -->
+                <div class="slds-modal__content slds-p-around_large modal-body">
+
+                    <template if:true={childRecords.length}>
+
+                        <div class="table-wrapper">
+                            <table class="slds-table slds-table_cell-buffer slds-table_bordered custom-table">
+                                <thead>
+                                    <tr class="table-header">
+                                        <th>Product Name</th>
+                                        <th>Priority Level</th>
+                                        <th>Promised Dispatch Date</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <template for:each={childRecords} for:item="rec">
+                                        <tr key={rec.Id}>
+                                            <td>
+                                                <div class="product-name">
+                                                    {rec.productName}
+                                                </div>
+                                            </td>
+
+                                            <td>
+                                                <span class={rec.priorityClass}>
+                                                    {rec.Priority__c}
+                                                </span>
+                                            </td>
+
+                                            <td>
+                                                <lightning-formatted-date-time value={rec.Promise_Date__c}
+                                                    year="numeric" month="short" day="2-digit">
+                                                </lightning-formatted-date-time>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Special Instructions UI -->
+                        <template if:true={specialInstructions}>
+                            <div class="instruction-box">
+
+                                <div class="instruction-header">
+                                    <lightning-icon icon-name="utility:note" size="small"
+                                        alternative-text="Instructions">
+                                    </lightning-icon>
+
+                                    <span class="instruction-title">
+                                        Special Dispatch Instructions
+                                    </span>
+                                </div>
+
+                                <div class="instruction-body">
+                                    {specialInstructions}
+                                </div>
+
+                            </div>
+                        </template>
+
+                    </template>
+
+                    <template if:false={childRecords.length}>
+                        <div class="empty-state">
+                            No Dispatch Items Available
+                        </div>
+                    </template>
+
+                </div>
+
+                <!-- Footer -->
+                <footer class="slds-modal__footer footer-section">
+                    <lightning-button label="Close" variant="neutral" onclick={closeModal}>
+                    </lightning-button>
+                </footer>
+
+            </div>
+        </section>
+
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

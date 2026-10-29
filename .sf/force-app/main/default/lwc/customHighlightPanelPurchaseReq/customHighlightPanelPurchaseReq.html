@@ -1,0 +1,121 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 09-03-2026
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<template>
+    <div class="slds-page-header slds-page-header_record-home custom-header">
+        <div class="slds-page-header__row">
+            <!-- Left: Icon & Record Details -->
+            <div class="slds-page-header__col-title">
+                <div class="slds-media">
+                    <div class="slds-media__figure">
+                        <lightning-icon icon-name="custom:custom93"
+                            alternative-text="Purchase Request"></lightning-icon>
+                    </div>
+                    <div class="slds-media__body">
+                        <p class="slds-line-height_reset slds-text-title_caps">Purchase Request</p>
+                        <h1 class="slds-page-header__title slds-truncate">{recordName}</h1>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Dynamic Action Buttons -->
+            <div class="slds-page-header__col-actions">
+                <div class="slds-page-header__controls">
+                    <lightning-button-group>
+                        <!-- Delete Button (Always Visible) -->
+                        <lightning-button label="Delete" onclick={handleDelete}></lightning-button>
+
+                        <!-- Add/Update Rates -->
+                        <template if:true={showAddUpdateRates}>
+                            <lightning-button label="Add/Update Rates"
+                                onclick={handleAddUpdateRates}></lightning-button>
+                        </template>
+
+                        <!-- Submit for Approval -->
+                        <template if:true={showSubmitForApproval}>
+                            <lightning-button label="Submit for Approval"
+                                onclick={handleSubmitForApproval}></lightning-button>
+                        </template>
+
+                        <!-- Approve -->
+                        <template if:true={showApprove}>
+                            <lightning-button label="Approve" onclick={handleApprove}></lightning-button>
+                        </template>
+
+                        <!-- Generate PO -->
+                        <template if:true={showGeneratePO}>
+                            <lightning-button label="Generate PO" onclick={handleGeneratePO}></lightning-button>
+                        </template>
+                    </lightning-button-group>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Submit for Approval prompt: mounted only after the button is clicked -->
+    <template if:true={isSubmitApprovalOpen}>
+        <c-purchase-request-submit-approval record-id={recordId}
+            onclose={handleModalCloseEvent}></c-purchase-request-submit-approval>
+    </template>
+
+    <!-- Modal: Add / Update Vendor Rates -->
+    <template if:true={isAddRatesOpen}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_large" aria-modal="true">
+            <div class="slds-modal__container">
+                <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close"
+                    onclick={closeModal}>
+                    <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse"
+                        size="small"></lightning-icon>
+                </button>
+                <div class="slds-modal__content slds-p-around_none">
+                    <c-purchase-request-rate-manager record-id={recordId} is-community="true"
+                        onclosemodal={handleModalCloseEvent}>
+                    </c-purchase-request-rate-manager>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- Modal: Review & Approve Screen -->
+    <template if:true={isApproveOpen}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_large" aria-modal="true">
+            <div class="slds-modal__container">
+                <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close"
+                    onclick={closeModal}>
+                    <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse"
+                        size="small"></lightning-icon>
+                </button>
+                <div class="slds-modal__content slds-p-around_none">
+                    <c-purchase-request-approve-screen record-id={recordId} is-community="true"
+                        onclosemodal={handleModalCloseEvent}>
+                    </c-purchase-request-approve-screen>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- Modal: Generate Purchase Orders -->
+    <template if:true={isGeneratePOOpen}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_large" aria-modal="true">
+            <div class="slds-modal__container">
+                <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close"
+                    onclick={closeModal}>
+                    <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse"
+                        size="small"></lightning-icon>
+                </button>
+                <div class="slds-modal__content slds-p-around_none">
+                    <c-purchase-request-generate-p-o-modal record-id={recordId} is-community="true"
+                        onclosemodal={handleModalCloseEvent}>
+                    </c-purchase-request-generate-p-o-modal>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

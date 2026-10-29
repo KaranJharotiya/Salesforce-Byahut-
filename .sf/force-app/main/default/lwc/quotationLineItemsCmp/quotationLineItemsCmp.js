@@ -1,0 +1,826 @@
+import { LightningElement, wire, track, api } from 'lwc';
+import { getRecord } from 'lightning/uiRecordApi';
+import { CloseActionScreenEvent } from 'lightning/actions';
+import { ShowToastEvent } from "lightning/platformShowToastEvent";
+import { CurrentPageReference, NavigationMixin } from 'lightning/navigation';
+// import { loadStyle } from 'lightning/platformResourceLoader';
+// import QuickActionModalSize from '@salesforce/resourceUrl/QuickActionModalSize';
+import getSelectedProduct from '@salesforce/apex/CartLineItemController.getSelectedProduct';
+import getSearchedProducts from '@salesforce/apex/CartLineItemController.getSearchedProducts';
+import createCartLineItem from '@salesforce/apex/CartLineItemController.createCartLineItem';
+import getObjectNameFromId from '@salesforce/apex/CartLineItemController.getObjectNameFromId';
+import getIndustryValues from '@salesforce/apex/CartLineItemController.getIndustryValues';
+import getSuggestedProduct from '@salesforce/apex/CartLineItemController.getSuggestedProduct';
+import getProductNameById from '@salesforce/apex/CartLineItemController.getProductNameById';
+import getProductCasById from '@salesforce/apex/CartLineItemController.getProductCasById';
+import getBrandNameById from '@salesforce/apex/CartLineItemController.getBrandNameById';
+import getProductCodeById from '@salesforce/apex/CartLineItemController.getProductCodeById';
+import createQuotationWithLineItems from '@salesforce/apex/CartLineItemController.createQuotationWithLineItems';
+import createQuotationWithLineItemsOpp from '@salesforce/apex/CartLineItemController.createQuotationWithLineItemsOpp';
+import getExistingQuotationProducts from '@salesforce/apex/CartLineItemController.getExistingQuotationProducts';
+
+export default class QuotationLineItemsCmp extends NavigationMixin(LightningElement) {
+    recordId;
+    objectApiName;
+    grandTotalAmount = 0;
+    disableSave = false;
+    // Lookup Fields Variables
+    productName = '';
+    productCASNumber = '';
+    productBrand = '';
+    productCode = '';
+    productIndustry = '';
+    value = '';
+    @track options = [];
+    selectedProductIds = [];
+
+    @track productRecords = [];
+    @track suggestedProductsList = [];
+    searchedText;
+
+    isLoading = false;
+
+    // Pagination Properties - Searched Products
+    pageSize = 25;
+    currentPage = 1;
+
+    // Pagination Properties - Suggested Products
+    suggestedPageSize = 25;
+    currentSuggestedPage = 1;
+
+    pNameDisplayInfo = {
+        primaryField: 'Name',
+        additionalFields: ['Product_Display_Info__c']
+    };
+
+
+    get isDataLoaded() {
+        return this.productRecords.length > 0;
+    }
+
+    get isSuggestedDateLoad() {
+        return this.suggestedProductsList.length > 0;
+    }
+
+    // Pagination Getters - Searched Products
+    get totalProductRecords() {
+        return this.productRecords.length;
+    }
+
+    get totalPages() {
+        return Math.ceil(this.productRecords.length / this.pageSize) || 1;
+    }
+
+    get disablePaginationSearchProducts() {
+        return this.productRecords.length <= 25;
+    }
+
+    get isFirstPage() {
+        return this.currentPage <= 1;
+    }
+
+    get isLastPage() {
+        return this.currentPage >= this.totalPages;
+    }
+
+    get recordStartIndex() {
+        return this.productRecords.length === 0 ? 0 : (this.currentPage - 1) * this.pageSize + 1;
+    }
+
+    get recordEndIndex() {
+        const calculatedEnd = this.currentPage * this.pageSize;
+        return calculatedEnd > this.productRecords.length ? this.productRecords.length : calculatedEnd;
+    }
+
+    get displayedProductRecords() {
+        const start = (this.currentPage - 1) * this.pageSize;
+        const end = start + this.pageSize;
+        return this.productRecords.slice(start, end).map((record, index) => ({
+            ...record,
+            originalIndex: start + index,
+            serialNumber: start + index + 1
+        }));
+    }
+
+    handlePrevPage() {
+        if (this.currentPage > 1) {
+            this.currentPage--;
+        }
+    }
+
+    handleNextPage() {
+        if (this.currentPage < this.totalPages) {
+            this.currentPage++;
+        }
+    }
+
+    // Pagination Getters & Handlers - Suggested Products
+    get totalSuggestedRecords() {
+        return this.suggestedProductsList.length;
+    }
+
+    get totalSuggestedPages() {
+        return Math.ceil(this.suggestedProductsList.length / this.suggestedPageSize) || 1;
+    }
+
+    get disablePaginationSuggestedProducts() {
+        return this.suggestedProductsList.length <= 25;
+    }
+
+    get isFirstSuggestedPage() {
+        return this.currentSuggestedPage <= 1;
+    }
+
+    get isLastSuggestedPage() {
+        return this.currentSuggestedPage >= this.totalSuggestedPages;
+    }
+
+    get displayedSuggestedProductRecords() {
+        const start = (this.currentSuggestedPage - 1) * this.suggestedPageSize;
+        const end = start + this.suggestedPageSize;
+        return this.suggestedProductsList.slice(start, end).map((record, index) => ({
+            ...record,
+            originalIndex: start + index,
+            serialNumber: start + index + 1
+        }));
+    }
+
+    handleSuggestedPrevPage() {
+        if (this.currentSuggestedPage > 1) {
+            this.currentSuggestedPage--;
+        }
+    }
+
+    handleSuggestedNextPage() {
+        if (this.currentSuggestedPage < this.totalSuggestedPages) {
+            this.currentSuggestedPage++;
+        }
+    }
+
+    connectedCallback() {
+        this.disableSave = false;
+        // loadStyle(this, QuickActionModalSize);
+    }
+
+    // disconnectedCallback() {
+    //     const cssLinks = document.querySelectorAll("link");
+    //     if (cssLinks) {
+    //         cssLinks.forEach((link) => {
+    //             const href = link.href;
+    //             if (href && href.includes('QuickActionModalSize')) {
+    //                 link.remove();
+    //             }
+    //         });
+    //     }
+    // }
+
+    pCasMatchingInfo = {
+        primaryField: { fieldPath: 'CAS_Number__c' }
+    };
+
+    pCasDisplayInfo = {
+        primaryField: 'CAS_Number__c',
+        additionalFields: ['Name']
+    };
+
+    pBrandMatchingInfo = {
+        primaryField: { fieldPath: 'Name' }
+    };
+
+    pBrandDisplayInfo = {
+        primaryField: 'Name'
+    };
+
+    pCodeMatchingInfo = {
+        primaryField: { fieldPath: 'Code__c' }
+    };
+
+    pCodeDisplayInfo = {
+        primaryField: 'Code__c',
+        additionalFields: ['Name']
+    };
+
+    parentAccountSelectedRecord;
+    handleValueSelectedOnAccount(event) {
+        console.log('event.detail >> ' + JSON.stringify(event.detail));
+        this.parentAccountSelectedRecord = event.detail;
+        console.log('parentAccountSelectedRecord >> ' + JSON.stringify(event.detail));
+        const fieldName = event.detail.fieldApiName;
+        const fieldValue = event.detail.mainField;
+        const objectName = event.detail.objectApiName;
+
+        if (fieldName === 'Name' && objectName === 'Product__c') {
+            this.productName = fieldValue;
+        } else if (fieldName === 'CAS_Number__c' && objectName === 'Product__c') {
+            this.productCASNumber = fieldValue;
+        } else if (fieldName === 'Code__c' && objectName === 'Product__c') {
+            this.productCode = fieldValue;
+        } else if (fieldName === 'Name' && objectName === 'Brand_Master__c') {
+            this.productBrand = event.detail.id;
+        }
+        this.currentPage = 1;
+        this.searchProducts();
+    }
+
+    async handleRecordChange(event) {
+        const selectedRecordId = event.detail?.recordId || null;
+        const fieldName = event.target.dataset.field;
+        const objectName = event.target.objectApiName;
+
+        try {
+            if (fieldName === 'Name' && objectName === 'Product__c') {
+                if (selectedRecordId) {
+                    const fetchedName = await getProductNameById({ recordId: selectedRecordId });
+                    //this.productName = fetchedName;
+                    this.productName = selectedRecordId;
+                } else {
+                    this.productName = '';
+                }
+                this.currentPage = 1;
+                this.searchProducts();
+            }
+        } catch (error) {
+            console.error('Error fetching product name:', JSON.stringify(error));
+        }
+    }
+
+    async handleCASNumberChange(event) {
+        const selectedRecordId = event.detail?.recordId || null;
+        try {
+            if (selectedRecordId) {
+                //const fetchedCAS = await getProductCasById({ recordId: selectedRecordId });
+                //console.log('fetchedCAS :::' , fetchedCAS);
+                //this.productCASNumber = fetchedCAS || '';
+                this.productCASNumber = selectedRecordId;
+              
+            } else {
+                this.productCASNumber = '';
+            }
+            this.currentPage = 1;
+            await this.searchProducts();
+        } catch (error) {
+            console.error('handleCASNumberChange Error :::', JSON.stringify(error));
+        }
+    }
+
+    async handleBrandNameChange(event) {
+        const selectedRecordId = event.detail?.recordId || null;
+        try {
+            if (selectedRecordId) {
+                this.productBrand = selectedRecordId;
+            } else {
+                this.productBrand = '';
+            }
+            this.currentPage = 1;
+            await this.searchProducts();
+        } catch (error) {
+            console.error('handleCodeChange Error :::', JSON.stringify(error));
+        }
+    }
+
+    async handleCodeChange(event) {
+        const selectedRecordId = event.detail?.recordId || null;
+        try {
+            if (selectedRecordId) {
+                //const fetchedCode = await getProductCodeById({ recordId: selectedRecordId });
+                //this.productCode = fetchedCode || '';
+                this.productCode = selectedRecordId;
+            } else {
+                this.productCode = '';
+            }
+            this.currentPage = 1;
+            await this.searchProducts();
+        } catch (error) {
+            console.error('handleCodeChange Error :::', JSON.stringify(error));
+        }
+    }
+
+    handleValueRemoved(event) {
+        const fieldName = event.detail.fieldApiName;
+        const objectName = event.detail.objectApiName;
+
+        if (fieldName === 'Name' && objectName === 'Product__c') {
+            this.productName = '';
+        } else if (fieldName === 'CAS_Number__c' && objectName === 'Product__c') {
+            this.productCASNumber = '';
+        } else if (fieldName === 'Code__c' && objectName === 'Product__c') {
+            this.productCode = '';
+        } else if (fieldName === 'Name' && objectName === 'Brand_Master__c') {
+            this.productBrand = '';
+        }
+        this.currentPage = 1;
+        this.searchProducts();
+    }
+
+    handleIndustrySelect(event) {
+        const value = event.target.value;
+        this.productIndustry = value;
+        this.currentPage = 1;
+        this.searchProducts();
+    }
+
+    handleChange(event) {
+        this.value = event.detail.value;
+    }
+
+    @wire(CurrentPageReference)
+    getPageRef(pageRef) {
+        if (pageRef) {
+            this.recordId = pageRef.state.c__recordId;
+            if (this.recordId) {
+                this.getObjectApiName();
+                if (this.objectApiName === 'Quotation__c') {
+                    this.loadExistingQuotationLineItems();
+                }
+            }
+        }
+    }
+
+    @wire(getIndustryValues)
+    wiredGetIndustryValues({ data, error }) {
+        if (data) {
+            this.options = data;
+        }
+    }
+
+    async getObjectApiName() {
+        if (!this.recordId) {
+            return;
+        }
+        try {
+            const res = await getObjectNameFromId({ recordId: this.recordId });
+            if (res) {
+                this.objectApiName = res;
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    async loadExistingQuotationLineItems() {
+        try {
+            const result = await getExistingQuotationProducts({ quotationId: this.recordId });
+
+            if (result && result.length > 0) {
+                let searchedRecords = [];
+                this.selectedProductIds = result.map(item => item.id);
+
+                result.forEach(item => {
+                    const listPrice = item.listPrice || 0;
+                    const qty = item.quantity || 0;
+                    const discount = item.discount || 0;
+                    const gst = item.gst || 0;
+
+                    const amount = listPrice * qty;
+                    const discountAmt = (amount * discount) / 100;
+                    const afterDiscount = amount - discountAmt;
+                    const gstAmt = (afterDiscount * gst) / 100;
+                    const totalAmt = afterDiscount + gstAmt;
+
+                    searchedRecords.push({
+                        Id: item.id,
+                        Name: item.name,
+                        CAS_Number__c: item.casNumber,
+                        List_Price__c: item.listPrice,
+                        Industry__c: item.industry,
+                        Stock__c: item.stock,
+                        Available_Quantity__c: item.availableQuantity,
+                        Hold_Quantity__c: item.holdQuantity,
+                        Code__c: item.code,
+
+                        brand: item.brandName,
+                        brandUrl: item.brandId ? `/lightning/r/Brand__c/${item.brandId}/view` : '',
+
+                        subBrand: item.subBrandName,
+                        subBrandUrl: item.subBrandId ? `/lightning/r/Brand__c/${item.subBrandId}/view` : '',
+
+                        category: item.categoryName,
+                        categoryUrl: item.categoryId ? `/lightning/r/Brand__c/${item.categoryId}/view` : '',
+
+                        subCategory: item.subCategoryName,
+                        subCategoryUrl: item.subCategoryId ? `/lightning/r/Brand__c/${item.subCategoryId}/view` : '',
+
+                        Quantity: item.quantity,
+                        Discount: item.discount,
+                        gst: item.gst,
+
+                        amount: amount > 0 ? amount.toFixed(2) : null,
+                        discountAmount: discountAmt > 0 ? discountAmt.toFixed(2) : null,
+                        afterDiscount: afterDiscount > 0 ? afterDiscount.toFixed(2) : null,
+                        gstAmount: gstAmt > 0 ? gstAmt.toFixed(2) : null,
+                        TotalAmount: totalAmt > 0 ? totalAmt.toFixed(2) : null,
+
+                        isChecked: true,
+                        isDisableQty: false,
+                        isDisablePrice: false,
+                        isEditingPrice: false
+                    });
+                });
+
+                this.productRecords = searchedRecords;
+                this.currentPage = 1;
+            }
+        } catch (error) {
+            console.error('Error fetching Line Items:', error);
+        }
+    }
+
+    async handleClickSave() {
+        const mergedArray = [...new Set([
+            ...this.productRecords,
+            ...this.suggestedProductsList
+        ])];
+
+        const invalidQtyItems = mergedArray.filter(
+            item => (item.isChecked || !item.isDisableQty) && (!item.Quantity || Number(item.Quantity) <= 0)
+        );
+
+        if (invalidQtyItems.length > 0) {
+            this.showErrorNotification('Please enter a valid Quantity (greater than 0) for all selected items.');
+            return;
+        }
+
+        // 2. Validation: Quantity Available Quantity se jyada nahi honi chahiye
+        const excessQtyItems = mergedArray.filter(
+            item => (item.isChecked || !item.isDisableQty) &&
+                item.Available_Quantity__c != null &&
+                Number(item.Quantity) > Number(item.Available_Quantity__c)
+        );
+
+        if (excessQtyItems.length > 0) {
+            const productNames = excessQtyItems.map(item => item.Name).join(', ');
+            this.showErrorNotification(`Quantity cannot be greater than Available Quantity for: ${productNames}`);
+            return;
+        }
+        const selectedCart = [];
+
+        mergedArray.forEach(item => {
+            if (!item.isDisableQty && item.Quantity && item.Quantity > 0) {
+                if (this.objectApiName === 'Opportunity__c') {
+                    selectedCart.push({
+                        Product__c: item.Id,
+                        Quantity__c: item.Quantity,
+                        Amount__c: item.List_Price__c,
+                        Total_Amount__c: item.TotalAmount,
+                        Discount__c: item.Discount,
+                        GST__c: item.gst,
+                    });
+                } else if (this.objectApiName === 'Lead__c') {
+                    selectedCart.push({
+                        Product__c: item.Id,
+                        Quantity__c: item.Quantity,
+                        Amount__c: item.List_Price__c,
+                        Total_Amount__c: item.TotalAmount,
+                        Discount__c: item.Discount,
+                        GST__c: item.gst,
+                    });
+                }
+            }
+            console.log('selectedCart', selectedCart);
+
+        });
+        if (this.selectedProductIds) {
+
+        }
+        if (selectedCart.length === 0) {
+            this.showWarningNotification('Please select products with valid quantity.');
+            return;
+        }
+
+        try {
+            this.isLoading = true;
+            let result;
+
+            if (this.objectApiName === 'Lead__c') {
+                result = await createQuotationWithLineItems({
+                    leadId: this.recordId,
+                    lineItems: selectedCart
+                });
+            } else if (this.objectApiName === 'Opportunity__c') {
+                result = await createQuotationWithLineItemsOpp({
+                    oppId: this.recordId,
+                    lineItems: selectedCart
+                });
+            }
+
+            if (result) {
+                this.showSuccessNotification(result);
+                this.closeScreen();
+                this.disableSave = true;
+                if (this.objectApiName === 'Lead__c') {
+                    setTimeout(() => {
+                        this[NavigationMixin.Navigate]({
+                            type: 'standard__recordPage',
+                            attributes: {
+                                recordId: this.recordId,
+                                objectApiName: 'Lead__c',
+                                actionName: 'view'
+                            }
+                        });
+                    }, 500);
+                } else {
+                    setTimeout(() => {
+                        this[NavigationMixin.Navigate]({
+                            type: 'standard__recordPage',
+                            attributes: {
+                                recordId: this.recordId,
+                                objectApiName: 'Opportunity__c',
+                                actionName: 'view'
+                            }
+                        });
+                    }, 500);
+                }
+            }
+        } catch (error) {
+            this.showErrorNotification(error?.body?.message || error?.message || 'Error saving items');
+        } finally {
+            this.isLoading = false;
+        }
+    }
+
+    handleCancel() {
+        this.closeScreen();
+        if (this.recordId) {
+            if (this.objectApiName === 'Lead__c') {
+                this[NavigationMixin.Navigate]({
+                    type: 'standard__recordPage',
+                    attributes: {
+                        recordId: this.recordId,
+                        objectApiName: 'Lead__c',
+                        actionName: 'view'
+                    }
+                });
+            } else {
+                this[NavigationMixin.Navigate]({
+                    type: 'standard__recordPage',
+                    attributes: {
+                        recordId: this.recordId,
+                        objectApiName: 'Opportunity__c',
+                        actionName: 'view'
+                    }
+                });
+            }
+        }
+    }
+
+    closeScreen() {
+        try {
+            this.dispatchEvent(new CloseActionScreenEvent());
+        } catch (e) {
+            if (this.recordId) {
+                setTimeout(() => {
+                    this[NavigationMixin.Navigate]({
+                        type: 'standard__recordPage',
+                        attributes: {
+                            recordId: this.recordId,
+                            objectApiName: 'Lead__c',
+                            actionName: 'view'
+                        }
+                    });
+                }, 1000);
+            }
+        }
+    }
+
+    updatePrices(name, inputValue, row) {
+        if (name === 'price') {
+            row.List_Price__c = inputValue;
+        } else if (name === 'qty') {
+            row.Quantity = inputValue;
+        } else if (name === 'discount') {
+            row.Discount = inputValue;
+        } else if (name === 'gst') {
+            row.gst = inputValue;
+        }
+
+        const totalQuantityPrice = Number(row.List_Price__c || 0) * Number(row.Quantity || 0);
+        row.amount = totalQuantityPrice;
+
+        row.discountAmount = ((totalQuantityPrice * Number(row.Discount || 0)) / 100).toFixed(2);
+        row.afterDiscount = (totalQuantityPrice - row.discountAmount).toFixed(2);
+
+        if (row.gst > 0) {
+            row.gstAmount = ((row.afterDiscount * Number(row.gst || 0)) / 100).toFixed(2);
+        } else {
+            row.gstAmount = 0;
+        }
+
+        row.TotalAmount = (Number(row.afterDiscount || 0) + Number(row.gstAmount || 0)).toFixed(2);
+    }
+
+    async handleInputChange(event) {
+        const index = Number(event.target.dataset.index);
+        const inputValue = Number(event.target.value || 0);
+        const name = event.target.name;
+        const id = event.target.dataset.id;
+
+        const tempRecords = [...this.productRecords];
+        const row = { ...tempRecords[index] };
+
+        if (name === 'price' || name === 'qty' || name === 'discount' || name === 'gst') {
+            this.updatePrices(name, inputValue, row);
+        } else if (name === 'checkbox') {
+            const isChecked = event.target.checked;
+            row.isChecked = isChecked;
+            row.isDisableQty = !isChecked;
+            row.isDisablePrice = !isChecked;
+            if (!this.selectedProductIds.includes(id) && isChecked) {
+                this.selectedProductIds.push(id);
+            } else {
+                this.selectedProductIds = this.selectedProductIds.filter(item => item !== id);
+            }
+            await this.loadSuggestedProducts();
+
+        }
+        tempRecords[index] = row;
+        this.productRecords = tempRecords;
+
+        this.calculateGrandTotal();
+    }
+
+    handleSuggestedInputChange(event) {
+        const index = Number(event.target.dataset.index);
+        const inputValue = Number(event.target.value || 0);
+        const name = event.target.name;
+
+        const tempRecords = [...this.suggestedProductsList];
+        const row = { ...tempRecords[index] };
+
+        if (name === 'price' || name === 'qty' || name === 'discount' || name === 'gst') {
+            this.updatePrices(name, inputValue, row);
+        } else if (name === 'checkbox') {
+            const isChecked = event.target.checked;
+            row.isChecked = isChecked;
+            row.isDisableQty = !isChecked;
+            row.isDisablePrice = !isChecked;
+        }
+        tempRecords[index] = row;
+        this.suggestedProductsList = tempRecords;
+
+        this.calculateGrandTotal();
+    }
+
+    calculateGrandTotal() {
+        const totalProducts = this.productRecords.reduce((sum, r) => sum + Number(r.TotalAmount || 0), 0);
+        const totalSuggested = this.suggestedProductsList.reduce((sum, r) => sum + Number(r.TotalAmount || 0), 0);
+        this.grandTotalAmount = (totalProducts + totalSuggested).toFixed(2);
+    }
+
+    async searchProducts() {
+        try {
+            this.isLoading = true;
+
+            const selectedRecords = this.productRecords.filter(
+                item => this.selectedProductIds.includes(item.Id)
+            );
+
+            if (!this.productName && !this.productCASNumber && !this.productBrand && !this.productCode && !this.productIndustry) {
+                this.productRecords = selectedRecords;
+                this.calculateGrandTotal();
+                return;
+            }
+
+            const result = await getSearchedProducts({
+                productName: this.productName,
+                productCASNumber: this.productCASNumber,
+                productBrand: this.productBrand,
+                productCode: this.productCode,
+                productIndustry: this.productIndustry
+            });
+
+            const searchedRecords = [];
+
+            if (result && result.length > 0) {
+                result.forEach(item => {
+                    searchedRecords.push({
+                        ...item,
+                        brand: item.Brand__r?.Name || '',
+                        brandUrl: item.Brand__c ? `/lightning/r/Brand__c/${item.Brand__c}/view` : '',
+                        subBrand: item.Sub_Brand__r?.Name || '',
+                        subBrandUrl: item.Sub_Brand__c ? `/lightning/r/Brand__c/${item.Sub_Brand__c}/view` : '',
+                        category: item.Category__r?.Name || '',
+                        categoryUrl: item.Category__c ? `/lightning/r/Brand__c/${item.Category__c}/view` : '',
+                        subCategory: item.Sub_Category__r?.Name || '',
+                        subCategoryUrl: item.Sub_Category__c ? `/lightning/r/Brand__c/${item.Sub_Category__c}/view` : '',
+                        TotalAmount: null,
+                        isChecked: this.selectedProductIds.includes(item.Id),
+                        isDisableQty: !this.selectedProductIds.includes(item.Id),
+                        isDisablePrice: !this.selectedProductIds.includes(item.Id),
+                        isEditingPrice: false
+                    });
+                });
+            }
+
+            const selectedIds = new Set(selectedRecords.map(item => item.Id));
+            const finalRecords = [
+                ...selectedRecords,
+                ...searchedRecords.filter(item => !selectedIds.has(item.Id))
+            ];
+
+            this.productRecords = finalRecords;
+
+            if (searchedRecords.length === 0 && selectedRecords.length === 0) {
+                this.showWarningNotification('No product found!');
+            }
+
+            this.calculateGrandTotal();
+
+        } catch (error) {
+            this.showErrorNotification(
+                'Internal server error ' +
+                (error?.body?.message || error?.message)
+            );
+        } finally {
+            this.isLoading = false;
+        }
+    }
+
+    async loadSuggestedProducts() {
+        try {
+            this.isLoading = true;
+            const result = await getSuggestedProduct({ productIds: this.selectedProductIds });
+            this.suggestedProductsList = [];
+            this.currentSuggestedPage = 1;
+            if (result && result.length > 0) {
+                result.forEach(item => {
+                    this.suggestedProductsList.push({
+                        Id: item?.Product__c,
+                        Name: item?.Product__r?.Name,
+                        Industry__c: item?.Product__r?.Industry__c,
+                        CAS_Number__c: item?.Product__r?.CAS_Number__c,
+                        Code__c: item?.Product__r?.Code__c,
+                        Stock__c: item?.Product__r?.Stock__c,
+                        Hold_Quantity__c: item?.Product__r?.Hold_Quantity__c,
+                        Available_Quantity__c: item?.Product__r?.Available_Quantity__c,
+                        List_Price__c: item?.Product__r?.List_Price__c,
+                        brand: item?.Product__r?.Brand__r?.Name || '',
+                        subBrand: item?.Product__r?.Sub_Brand__r?.Name || '',
+                        category: item?.Product__r?.Category__r?.Name || '',
+                        subCategory: item?.Product__r?.Sub_Category__r?.Name || '',
+                        TotalAmount: null,
+                        isChecked: false,
+                        isDisableQty: true,
+                        isDisablePrice: true,
+                        isEditingPrice: false
+                    });
+                });
+            }
+        } catch (error) {
+            this.showErrorNotification('Internal server error ' + (error?.body?.message || error?.message));
+        } finally {
+            this.isLoading = false;
+        }
+    }
+
+    showSuccessNotification(messageText) {
+        this.dispatchEvent(new ShowToastEvent({
+            title: 'Success',
+            message: messageText,
+            variant: 'success'
+        }));
+    }
+
+    showErrorNotification(messageText) {
+        this.dispatchEvent(new ShowToastEvent({
+            title: 'Error',
+            message: messageText,
+            variant: 'error'
+        }));
+    }
+
+    showWarningNotification(messageText) {
+        this.dispatchEvent(new ShowToastEvent({
+            title: 'Warning',
+            message: messageText,
+            variant: 'warning'
+        }));
+    }
+
+    handleEditPrice(event) {
+        const index = Number(event.target.dataset.index);
+        const tempRecords = [...this.productRecords];
+        tempRecords[index] = { ...tempRecords[index], isEditingPrice: true };
+        this.productRecords = tempRecords;
+    }
+
+    handlePriceBlur(event) {
+        const index = Number(event.target.dataset.index);
+        const tempRecords = [...this.productRecords];
+        tempRecords[index] = { ...tempRecords[index], isEditingPrice: false };
+        this.productRecords = tempRecords;
+    }
+
+    handleSuggestedEditPrice(event) {
+        const index = Number(event.target.dataset.index);
+        const tempRecords = [...this.suggestedProductsList];
+        tempRecords[index] = { ...tempRecords[index], isEditingPrice: true };
+        this.suggestedProductsList = tempRecords;
+    }
+
+    handleSuggestedPriceBlur(event) {
+        const index = Number(event.target.dataset.index);
+        const tempRecords = [...this.suggestedProductsList];
+        tempRecords[index] = { ...tempRecords[index], isEditingPrice: false };
+        this.suggestedProductsList = tempRecords;
+    }
+}
